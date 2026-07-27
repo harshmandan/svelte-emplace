@@ -3,6 +3,7 @@ import { mount, unmount, flushSync } from 'svelte';
 import { emplace } from 'svelte-emplace';
 import Harness from './fixtures/Harness.svelte';
 import Swap from './fixtures/Swap.svelte';
+import Fade from './fixtures/Fade.svelte';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let noise;
@@ -26,6 +27,47 @@ test('A5: <In> registers at init; outlet has content by first flush', () => {
 	flushSync();
 	expect(inHeader('.a')).toBe(true);
 	expect(document.querySelector('main .a')).toBe(null);
+	expect(noise).toEqual([]);
+});
+
+test('A7: attachments fire natively, with the destination node', async () => {
+	const e = emplace();
+	mount(Harness, { target: document.body, props: { e } });
+	flushSync();
+	const { attached } = globalThis.__probe;
+	expect(attached.length).toBe(1);
+	expect(attached[0].closest('header')).toBeTruthy();
+	globalThis.__probe.setA(false);
+	flushSync();
+	await wait(200);
+	expect(globalThis.__probe.detached).toBe(1);
+	expect(noise).toEqual([]);
+});
+
+test('A6: transitions native — intro on client add, outro delays removal', async () => {
+	const e = emplace();
+	globalThis.__resetAnimations();
+	mount(Fade, { target: document.body, props: { e } });
+	flushSync();
+
+	const introAnims = globalThis.__animations.filter((a) => a.el.classList?.contains('f'));
+	console.log('A6 intro animations:', introAnims.length, JSON.stringify(introAnims[0]?.keyframes?.slice(0, 2)));
+	expect(introAnims.length).toBeGreaterThan(0);
+	expect(introAnims[0].el.closest('header')).toBeTruthy();
+	await wait(200);
+
+	globalThis.__resetAnimations();
+	globalThis.__fade(false);
+	flushSync();
+	await wait(0); // unregistration is deliberately deferred one microtask
+	flushSync();
+	const outroAnims = globalThis.__animations.filter((a) => a.el.classList?.contains('f'));
+	console.log('A6 outro animations:', outroAnims.length, 'node still present:', !!document.querySelector('header .f'));
+	expect(outroAnims.length).toBeGreaterThan(0);
+	expect(document.querySelector('header .f')).toBeTruthy(); // outro animating, not instant
+	await wait(300);
+	console.log('A6 after outro, node present:', !!document.querySelector('header .f'));
+	expect(document.querySelector('header .f')).toBe(null);
 	expect(noise).toEqual([]);
 });
 

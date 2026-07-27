@@ -37,7 +37,12 @@
 		e.reg.inputs.push(input);
 
 		onDestroy(() => {
-			e.reg.inputs = e.reg.inputs.filter((r) => r !== input);
+			// Deferred out of the teardown pass deliberately: mutating the registry
+			// *during* destroy makes the outlet drop its DOM with no outro and no
+			// attachment cleanup. One microtask later it is an ordinary update.
+			queueMicrotask(() => {
+				e.reg.inputs = e.reg.inputs.filter((r) => r !== input);
+			});
 		});
 	} else {
 		// svelte-ignore state_referenced_locally
