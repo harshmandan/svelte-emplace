@@ -2,6 +2,12 @@
 	@component
 	Emplaces its children into every `<Out of={...}>` for the same handle.
 	Renders nothing where it is written.
+
+	```svelte
+	<In into={pageTitle}>
+		<h1>{data.title}</h1>
+	</In>
+	```
 -->
 <script lang="ts">
 	import { BROWSER } from 'esm-env';
@@ -40,8 +46,9 @@
 			// Deferred out of the teardown pass deliberately: mutating the registry
 			// *during* destroy makes the outlet drop its DOM with no outro and no
 			// attachment cleanup. One microtask later it is an ordinary update.
+			// Filtered by seq, not identity — `$state` proxies the pushed record.
 			queueMicrotask(() => {
-				e.reg.inputs = e.reg.inputs.filter((r) => r !== input);
+				e.reg.inputs = e.reg.inputs.filter((r) => r.seq !== seq);
 			});
 		});
 	} else {

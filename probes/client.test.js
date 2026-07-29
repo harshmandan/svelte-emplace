@@ -94,3 +94,23 @@ test('A17: swapping snippet identity propagates', () => {
 	expect(document.querySelector('header .sn').textContent).toBe('SNIP-B');
 	expect(noise).toEqual([]);
 });
+
+test('A18: winner survives navigation churn (new mounts before old destroys)', async () => {
+	const e = emplace();
+	mount(Harness, { target: document.body, props: { e } });
+	flushSync();
+	expect(inHeader('.a')).toBe(true);
+
+	globalThis.__probe.setB(true); // "new page" registers
+	flushSync();
+	expect(inHeader('.b')).toBe(true);
+	expect(inHeader('.a')).toBe(false);
+
+	globalThis.__probe.setA(false); // "old page" tears down afterwards
+	flushSync();
+	await wait(200);
+	console.log('A18 final:', html().match(/<header>[\s\S]*?<\/header>/)?.[0]);
+	expect(inHeader('.b')).toBe(true);
+	expect(inHeader('.a')).toBe(false);
+	expect(noise).toEqual([]);
+});
