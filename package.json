@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "svelte-package -i src/lib -o dist",
-    "test": "vitest run",
+    "test": "node probes/ssr.mjs && vitest run",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "probe:ssr": "node probes/ssr.mjs"
   },
