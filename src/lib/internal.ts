@@ -59,3 +59,4 @@ export function pick<T extends Input>(inputs: readonly T[], mode: Mode): T[] {
 }
 
 export const OUT_ATTR = 'data-emplace-out';
+export const SSR_ATTR = 'data-emplace-ssr';

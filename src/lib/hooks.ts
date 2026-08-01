@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { render } from 'svelte/server';
 import Children from './Children.svelte';
-import { OUT_ATTR, pick } from './internal.js';
+import { OUT_ATTR, SSR_ATTR, pick } from './internal.js';
 import { installStore, type ServerStore } from './registry.js';
 
 const als = new AsyncLocalStorage<ServerStore>();
@@ -89,7 +89,7 @@ export const emplaceHandle = ({ event, resolve }: HandleInput): MaybePromise<Res
 		});
 	});
 
-/** Insert `content` into every anchor for `id`. */
+/** Insert `content` into the server-copy element of every anchor for `id`. */
 function splice(html: string, id: string, content: string): string {
 	const needle = `${OUT_ATTR}="${id}"`;
 	let out = html;
@@ -99,7 +99,8 @@ function splice(html: string, id: string, content: string): string {
 		const anchor = out.indexOf(needle, at);
 		if (anchor === -1) return out;
 
-		const close = out.indexOf('</div>', anchor);
+		const mark = out.indexOf(SSR_ATTR, anchor);
+		const close = mark === -1 ? -1 : out.indexOf('</div>', mark);
 		if (close === -1) return out;
 
 		out = out.slice(0, close) + content + out.slice(close);
