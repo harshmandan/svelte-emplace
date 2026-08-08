@@ -3,15 +3,33 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"types": ["node"],
+		"lib": [
+			"ES2022",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"types": [
+			"node"
+		],
 		"strict": true,
 		"checkJs": true,
 		"allowJs": true,
 		"isolatedModules": true,
 		"verbatimModuleSyntax": true,
 		"skipLibCheck": true,
-		"noEmit": true
+		"noEmit": true,
+		"baseUrl": ".",
+		"paths": {
+			"svelte-emplace": [
+				"./src/lib/index.ts"
+			],
+			"svelte-emplace/hooks": [
+				"./src/lib/hooks.ts"
+			]
+		}
 	},
-	"include": ["src/**/*.ts", "src/**/*.svelte"]
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.svelte"
+	]
 }

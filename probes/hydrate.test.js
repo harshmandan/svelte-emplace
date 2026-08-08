@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { test, expect, beforeEach } from 'vitest';
+import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { hydrate, flushSync } from 'svelte';
 import { emplace } from 'svelte-emplace';
 import SsrApp from './fixtures/SsrApp.svelte';
@@ -8,13 +8,18 @@ import SsrApp from './fixtures/SsrApp.svelte';
 const ssr = JSON.parse(readFileSync('probes/.out/ssr.json', 'utf8'));
 
 let noise;
+let saved;
+
 beforeEach(() => {
 	noise = [];
-	const w = console.warn, er = console.error, tr = console.trace;
+	saved = [console.warn, console.error, console.trace];
 	console.warn = (...a) => noise.push('warn: ' + a.join(' '));
 	console.error = (...a) => noise.push('error: ' + a.join(' '));
 	console.trace = () => {};
-	return () => { console.warn = w; console.error = er; console.trace = tr; };
+});
+
+afterEach(() => {
+	[console.warn, console.error, console.trace] = saved;
 });
 
 test('A9/A10: hydrates server output with zero mismatch and no duplication', () => {

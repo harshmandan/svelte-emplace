@@ -1,4 +1,4 @@
-import { test, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { mount, unmount, flushSync } from 'svelte';
 import { emplace } from 'svelte-emplace';
 import Harness from './fixtures/Harness.svelte';
@@ -7,15 +7,19 @@ import Fade from './fixtures/Fade.svelte';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let noise;
+let saved;
 
 beforeEach(() => {
 	document.body.innerHTML = '';
 	noise = [];
-	const w = console.warn, e = console.error, t = console.trace;
+	saved = [console.warn, console.error, console.trace];
 	console.warn = (...a) => noise.push('warn: ' + a.join(' '));
 	console.error = (...a) => noise.push('error: ' + a.join(' '));
 	console.trace = () => {};
-	afterEach(() => { console.warn = w; console.error = e; console.trace = t; });
+});
+
+afterEach(() => {
+	[console.warn, console.error, console.trace] = saved;
 });
 
 const html = () => document.body.innerHTML;
