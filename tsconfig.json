@@ -18,13 +18,9 @@
 		"verbatimModuleSyntax": true,
 		"skipLibCheck": true,
 		"noEmit": true,
-		"baseUrl": ".",
 		"paths": {
 			"svelte-emplace": [
 				"./src/lib/index.ts"
-			],
-			"svelte-emplace/hooks": [
-				"./src/lib/hooks.ts"
 			]
 		}
 	},

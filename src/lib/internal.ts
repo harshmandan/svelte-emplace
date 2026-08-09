@@ -1,62 +1,76 @@
-import type { Snippet } from 'svelte';
-
-export type Mode = 'single' | 'multiple';
-
-export interface Input {
-	readonly seq: number;
-	readonly priority: number;
-	readonly children: Snippet | undefined;
-}
-
-/** @internal An `<In>` collected during SSR, plus the context it was authored in. */
-export interface ServerInput extends Input {
-	readonly context: Map<unknown, unknown>;
-}
-
-export interface Emplacement {
-	/** Stable id. Only used to key the server-rendered anchor. */
-	readonly id: string;
-	readonly mode: Mode;
-	/** @internal Client-side registry, shared between `<In>` and `<Out>`. */
-	readonly reg: { inputs: Input[] };
-}
-
-export interface EmplaceOptions {
-	/**
-	 * `'single'` (default) renders only the winning `<In>` — highest `priority`,
-	 * ties broken by most recently registered. `'multiple'` renders all of them,
-	 * ordered by `priority` then registration order.
-	 */
-	mode?: Mode;
-	/** Stable key for the server anchor. Defaults to an auto-incrementing id. */
-	key?: string;
+/** @internal An ordered position reserved inside a destination. */
+export interface Slot {
+	start: Comment;
+	priority: number;
+	seq: number;
 }
 
 let seq = 0;
+const reserved = new WeakMap<Element, Slot[]>();
 
-/** Monotonic app-wide, so a newly registered input always outranks an older one. */
-export function nextSeq(): number {
-	return ++seq;
+/** A `to` string is a CSS selector when it starts like one, otherwise a name. */
+const IS_SELECTOR = /^[#.[]/;
+
+/**
+ * Where content should go. Several elements can match one name, which is how a
+ * single source feeds a mobile and a desktop destination at once. Anything
+ * unresolvable falls back to the body layer rather than throwing.
+ */
+export function resolveTargets(to?: string | Element | null): Element[] {
+	if (to instanceof Element) return [to];
+
+	if (typeof to === 'string' && to !== '') {
+		const selector = IS_SELECTOR.test(to) ? to : `[data-emplace="${to}"]`;
+		const found = document.querySelectorAll(selector);
+		if (found.length > 0) return Array.from(found);
+	}
+
+	return [bodyLayer()];
+}
+
+let layer: Element | null = null;
+
+/** A single shared container at the end of `<body>`, created on first use. */
+function bodyLayer(): Element {
+	if (layer?.isConnected) return layer;
+
+	layer = document.querySelector('[data-emplace-layer]');
+
+	if (!layer) {
+		layer = document.createElement('div');
+		layer.setAttribute('data-emplace-layer', '');
+		document.body.append(layer);
+	}
+
+	return layer;
 }
 
 /**
- * Which inputs an outlet should render, in order. Recomputed from the live set
- * on every change, so teardown churn during navigation can never leave a stale
- * winner behind.
+ * Reserve an ordered position in `target`. Each slot's content sits between its
+ * own comment and the next slot's, so DOM order follows `priority` — ties
+ * following registration order — regardless of what order things mount in.
+ * Returns the node to mount before; `undefined` means append.
  */
-export function pick<T extends Input>(inputs: readonly T[], mode: Mode): T[] {
-	if (inputs.length === 0) return [];
+export function claim(target: Element, priority: number): { slot: Slot; anchor: Node | undefined } {
+	let list = reserved.get(target);
+	if (!list) reserved.set(target, (list = []));
 
-	if (mode === 'multiple') {
-		return [...inputs].sort((a, b) => b.priority - a.priority || a.seq - b.seq);
-	}
+	const slot: Slot = { start: document.createComment(''), priority, seq: ++seq };
 
-	let win = inputs[0];
-	for (const c of inputs) {
-		if (c.priority > win.priority || (c.priority === win.priority && c.seq > win.seq)) win = c;
-	}
-	return [win];
+	const at = list.findIndex((s) => s.priority < priority);
+	const index = at === -1 ? list.length : at;
+	const following = list[index];
+
+	target.insertBefore(slot.start, following ? following.start : null);
+	list.splice(index, 0, slot);
+
+	return { slot, anchor: following?.start };
 }
 
-export const OUT_ATTR = 'data-emplace-out';
-export const SSR_ATTR = 'data-emplace-ssr';
+/** Give up a reserved position. Call it once the content's outro has finished. */
+export function release(target: Element, slot: Slot): void {
+	const list = reserved.get(target);
+	const at = list?.indexOf(slot) ?? -1;
+	if (list && at !== -1) list.splice(at, 1);
+	slot.start.remove();
+}

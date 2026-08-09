@@ -1,6 +1,7 @@
 # svelte-emplace
 
-Render content from a nested component into a distant outlet.
+Put a modal, tooltip or toast anywhere on the page. Content is mounted straight into its
+target, so measurements, focus and closing animations are right the first time.
 
 ```bash
 npm install svelte-emplace
@@ -8,59 +9,75 @@ npm install svelte-emplace
 
 Requires Svelte 5.
 
-## Use
-
-Create a handle in a module, so both sides share the same identity:
-
-```js
-// src/lib/slots.js
-import { emplace } from 'svelte-emplace';
-
-export const pageTitle = emplace();
-export const toolbar = emplace({ mode: 'multiple' });
-```
-
-Put an outlet where the content should appear:
+## Quick start
 
 ```svelte
 <script>
-	import { Out } from 'svelte-emplace';
-	import { pageTitle } from '$lib/slots.js';
+	import { Emplace } from 'svelte-emplace';
 </script>
 
-<header><h1><Out of={pageTitle} /></h1></header>
+<Emplace>
+	<div class="modal" transition:fade>…</div>
+</Emplace>
 ```
 
-Emplace from anywhere below it:
+One import, one component, no props. Content goes into a shared layer at the end of `<body>`.
+
+## Choosing a destination
+
+`to` takes a name, a CSS selector, or an element:
 
 ```svelte
-<script>
-	import { In } from 'svelte-emplace';
-	import { pageTitle } from '$lib/slots.js';
-	let { data } = $props();
-</script>
-
-<In into={pageTitle}>{data.title}</In>
+<h1 data-emplace="title"></h1>
 ```
 
-For server rendering, add the hook:
-
-```js
-// src/hooks.server.js
-export { emplaceHandle as handle } from 'svelte-emplace/hooks';
+```svelte
+<Emplace to="title">{data.title}</Emplace>
+<Emplace to="#tooltips">…</Emplace>
+<Emplace to={element}>…</Emplace>
 ```
 
-## API
+A string starting with `#`, `.` or `[` is a selector; anything else is a name, matching
+`[data-emplace="name"]`. If nothing matches, content goes to the body layer.
 
-`emplace({ mode, key })` returns a handle.
+If several elements share a name, the content renders into all of them.
 
-- `mode: 'single'` (default) renders the winning `<In>`: highest `priority`, ties broken by
-  most recently registered.
-- `mode: 'multiple'` renders every `<In>`, ordered by `priority` then registration.
-- `key` sets a stable id for the server anchor.
+## Ordering
 
-`<In into={handle} priority={0}>…</In>` emplaces its children and renders nothing where it is
-written. `<Out of={handle} />` renders whatever was emplaced.
+`priority` orders several sources at one destination. Higher sorts first, ties keep
+registration order, and the order holds regardless of what mounts when.
+
+```svelte
+<Emplace to="toolbar" priority={10}><button>Save</button></Emplace>
+<Emplace to="toolbar"><button>Cancel</button></Emplace>
+```
+
+## Errors
+
+A `<svelte:boundary>` in the tree that wrote the content catches its errors.
+
+```svelte
+<svelte:boundary onerror={report}>
+	{#snippet failed()}<p>Could not open</p>{/snippet}
+	<Emplace><Modal /></Emplace>
+</svelte:boundary>
+```
+
+## Transitions
+
+Put the transition on your own element inside `<Emplace>`. Opening and closing both animate.
+
+```svelte
+<Emplace><div transition:fly={{ y: 20 }}>…</div></Emplace>
+```
+
+Svelte does not allow `transition:` on a component, so it cannot go on `<Emplace>` itself.
+
+## Notes
+
+- Emplaced content is client only. There is no server rendering.
+- `to` is resolved once, when the content is created. If that element is not in the page yet,
+  the content goes to the body layer and stays there.
 
 ## License
 

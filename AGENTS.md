@@ -1,76 +1,73 @@
 # AGENTS.md
 
-Read this before changing anything in `src/lib`.
+Read this before changing `src/lib`. It is 180 lines of code and four of them are
+load-bearing in ways that look arbitrary.
 
 ## What this package is
 
-`<Out>` renders emplaced snippets **itself**, with `{@render}`, inside the normal
-component tree. It does not `mount()` a detached root. That single decision is
-what makes transitions, attachments and `<svelte:boundary>` native instead of
-emulated, and it is the reason this package exists rather than being another
-portal. Do not reintroduce `mount()`.
+Content is **created at its destination**, never moved there. `<Emplace>` mounts
+its children into the target element. That single decision is the reason the
+package exists: attachments and measurements see the real parent on their first
+run, and nothing is re-parented, so iframes, video, focus and CSS animations are
+not reset. Any change that relocates DOM after mount defeats the purpose.
 
-On the server, `<In>` registers into an `AsyncLocalStorage` store and the hook
-renders each snippet *after* the page render, splicing the result into the
-outlet's anchor. That is what puts server HTML in the correct DOM position
-without moving nodes.
+## Four things found by probing, not reasoning
 
-## Four constraints found by probing, not reasoning
+Each was measured, each silently breaks something if reverted, and each is
+covered by `probes/emplace.test.js`. Run `bun run test` before and after changes.
 
-Every one of these is load-bearing and every one silently breaks something if
-reverted. `probes/` covers all four; run `npm test` before and after any change.
+1. **Mount inside an `$effect`; unmount in *that effect's* cleanup.** Doing the
+   same work at init plus `onDestroy` suppresses the outro entirely — the content
+   is torn down synchronously and no closing animation ever plays. This is a
+   phase difference, not a preference.
 
-1. **Unregistration must be deferred one microtask.** Mutating the registry
-   inside `onDestroy` happens during Svelte's teardown pass, and the outlet then
-   drops the DOM with **no outro and no attachment cleanup**. See `In.svelte`.
+2. **The snippet travels in a `$state` box, and the box is never written empty.**
+   Props given to `mount()` are not live, so the box is what keeps a swapped
+   snippet in sync. The `if (children)` guard matters because the sync effect runs
+   once more with `children` undefined while the source is being torn down;
+   writing that through blanks the destination before the outro can play.
 
-2. **Unregister by `seq`, never by identity.** Pushing a record into a `$state`
-   array proxies it, so `inputs[i] !== record` and an identity filter removes
-   nothing. It also logs `state_proxy_equality_mismatch`.
+3. **`children` must stay out of the mounting effect.** Reading it there makes a
+   snippet swap tear the destination down and rebuild it, losing DOM state and
+   replaying the intro. That is why the box is passed and the prop is not.
 
-3. **The server copy needs its own static, client-childless element.** Svelte
-   hydrates extra server children leniently *only* in a fully static element. Put
-   the server copy in the same element as the each-block and you get
-   `hydration_mismatch`. See the inner `data-emplace-ssr` div in `Out.svelte`.
+4. **Ordering uses comment anchors, not append order.** Each slot's content sits
+   between its own comment and the next slot's, so `priority` holds no matter what
+   order things mount in. See `claim`/`release` in `internal.ts`.
 
-4. **`render()` from `svelte/server` is lazy.** It returns
-   `{ get head(), get body() }` and component bodies do not execute until a
-   property is read. Collect *after* reading `.body`, or the store is empty. This
-   is why the hook works inside `transformPageChunk`.
+## Test environment
 
-## Registration timing
+`bun test` runs against **jsdom**, wired up by hand in `probes/setup-bun.js`. Do
+not switch to happy-dom: it does not implement enough of the transition path, so
+Svelte's outros produce no keyframes there and every transition assertion passes
+or fails for the wrong reason. This cost hours once.
 
-`<In>` registers during **init**, not in an effect, so the outlet has content by
-the first flush — including the flush right after hydration. That is what makes
-the handover single-paint: the live block renders and `onMount` removes the
-server copy in the same flush. Moving registration into an `$effect` reintroduces
-a flash.
+Two related traps:
 
-## Ordering
+- Svelte emits a **zero-duration animation for the delay phase** before the real
+  one. Counting animations is not enough — filter on `keyframes.length > 0` or you
+  will "prove" an animation that nobody can see.
+- The real animation is not created until a microtask after the removal. Assert
+  after `await wait(0); flushSync()`.
 
-Precedence is `priority`, then `seq` (monotonic, app-wide). It is recomputed from
-the live set on every change, so teardown churn during navigation cannot leave a
-stale winner. Do not switch to "last mounted wins" bookkeeping.
+jsdom has no Web Animations API at all, so `probes/setup-waapi.js` stubs exactly
+the surface Svelte touches: `animate`, `getAnimations`, `onfinish`, `cancel`,
+`effect`, `currentTime`, `playState`. It also records every call, which is how the
+probes assert on real keyframes. `CustomEvent` and friends must come from jsdom's
+realm — Bun defines its own, and jsdom rejects a foreign-realm event.
 
-## Known limits
+## Known parity limits, not bugs
 
-`$props.id()` regenerates across the handover. Pages using emplacement are not
-streamed (the hook buffers, because a top-of-document anchor is filled by
-content rendered lower down).
+- A transition inside a **nested block** does not animate when an ancestor block
+  is removed. Verified identical in plain Svelte with nothing portaled at all, so
+  it is not ours to fix. `E15` pins it so a future contributor does not chase it.
+- `transition:` cannot be placed on `<Emplace>`; Svelte rejects transition
+  directives on any component (upstream issue 11452).
+- No server rendering. Emplaced content is client-only by design — see README.
 
 ## Probes
 
-- `probes/ssr.mjs` — real server pipeline through `hooks.ts`; writes
-  `probes/.out/ssr.json`, which the hydration probe consumes so hydration is
-  tested against real server output rather than a fixture.
-- `probes/client.test.js` — registration timing, transitions, attachments,
-  multi-outlet, snippet identity, ordering churn.
-- `probes/hydrate.test.js` — mismatch-free hydration and the single-flush
-  handover.
-- `probes/boundary.test.js` — where errors surface.
-- `probes/kit/` — SvelteKit app for SSR output, cross-request isolation and
-  no-hook degradation. Run `npx vite dev` inside it and inspect the HTML.
-- `probes/setup-waapi.js` — jsdom has no Web Animations API; Svelte transitions
-  need `element.animate`. The stub mirrors only the surface Svelte touches.
-
-Not covered: hydration in a real browser. jsdom covers the mechanism.
+`probes/emplace.test.js` covers destination resolution (name, selector, element,
+fallback, multi-match), attachment timing and teardown, the closing animation
+including real keyframes, reopen cleanliness, snippet swapping, priority ordering
+under late mounts, and error bridging on both update and first render.
