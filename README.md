@@ -96,6 +96,37 @@ Put the transition on an element inside `<Emplace>`. Intro and outro both play, 
 
 Svelte does not allow `transition:` on a component, so it cannot go on `<Emplace>` itself.
 
+## Server rendering (optional)
+
+Off by default. Add the hook and content aimed at a **name** is rendered into that
+destination in the server HTML:
+
+```js
+// src/hooks.server.js
+export { emplaceHandle as handle } from 'svelte-emplace/server';
+```
+
+Nothing in your components changes. `<Emplace to="title">` now appears inside
+`<h1 data-emplace="title">` in the first response, with `getContext` and
+`<svelte:head>` working from inside emplaced content.
+
+Only names are server-rendered. CSS selectors, element targets and the body layer
+need a DOM, so they stay client-only and appear after hydration — which is also
+what a modal or tooltip wants.
+
+Three things to know:
+
+- **The destination element must be empty**, like the `<h1>` above. That is what
+  makes the splice point unambiguous, and what keeps hydration valid.
+- **A page using it is not streamed.** A destination near the top of the document
+  is filled by content rendered further down, so the response is buffered.
+- **`$props.id()` inside emplaced content is regenerated on the client**, because
+  the destination re-renders rather than hydrating the server copy. References
+  within the content stay consistent; one from outside pointing in will not.
+
+Without the hook everything still works — the content just appears after
+hydration, and you get one warning telling you so.
+
 ## API
 
 | prop | default | |

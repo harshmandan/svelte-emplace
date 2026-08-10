@@ -1,3 +1,7 @@
+/** Attribute marking a destination, and the wrapper around a server-rendered copy. */
+export const NAME_ATTR = 'data-emplace';
+export const SSR_ATTR = 'data-emplace-ssr';
+
 /** @internal An ordered position reserved inside a destination. */
 export interface Slot {
 	start: Comment;
@@ -29,7 +33,7 @@ export function resolveTargets(to?: string | Element | null): Element[] {
 	if (isElement(to)) return [to];
 
 	if (typeof to === 'string' && to !== '') {
-		const selector = IS_SELECTOR.test(to) ? to : `[data-emplace="${to}"]`;
+		const selector = IS_SELECTOR.test(to) ? to : `[${NAME_ATTR}="${to}"]`;
 		const found = document.querySelectorAll(selector);
 		if (found.length > 0) return Array.from(found);
 	}
@@ -74,6 +78,15 @@ export function claim(target: Element, priority: number): { slot: Slot; anchor: 
 	list.splice(index, 0, slot);
 
 	return { slot, anchor: following?.start };
+}
+
+/**
+ * Remove the copy the server rendered into `target`, once the live content has
+ * mounted alongside it. Called on mount, in the same flush, so there is no frame
+ * where both or neither are visible.
+ */
+export function dropServerCopy(target: Element): void {
+	target.querySelector(`:scope > [${SSR_ATTR}]`)?.remove();
 }
 
 /** Give up a reserved position. Call it once the content's outro has finished. */

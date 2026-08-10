@@ -16,9 +16,10 @@
 	throwing.
 -->
 <script lang="ts">
-	import { mount, unmount, type Snippet } from 'svelte';
+	import { getAllContexts, mount, unmount, type Snippet } from 'svelte';
 	import Boundary from './Boundary.svelte';
-	import { claim, release, resolveTargets } from './internal.js';
+	import { claim, dropServerCopy, release, resolveTargets } from './internal.js';
+	import { serverRegister } from './registry.js';
 
 	interface Props {
 		/** A name, a CSS selector, or an element. Omit for the body layer. */
@@ -31,6 +32,18 @@
 	let { to, priority = 0, children }: Props = $props();
 
 	let caught: unknown = $state(null);
+
+	// On the server there is no DOM to resolve, so only a plain name can be placed —
+	// it is spliced into `[data-emplace="name"]` in the HTML by the hook. Selectors,
+	// elements and the body layer stay client-only. Nothing below this runs on the
+	// server: Svelte strips effect bodies there.
+	if (typeof document === 'undefined') {
+		// svelte-ignore state_referenced_locally
+		if (typeof to === 'string' && to !== '' && !/^[#.[]/.test(to)) {
+			// svelte-ignore state_referenced_locally
+			serverRegister({ name: to, priority, children, context: getAllContexts() });
+		}
+	}
 
 	// The snippet travels in a box, for two reasons. Props handed to `mount()` are
 	// not live, so this is what keeps a swapped snippet in sync. And keeping
@@ -67,6 +80,10 @@
 					onerror: (error: unknown) => queueMicrotask(() => (caught = error))
 				}
 			});
+
+			// The live content is mounted now, so drop whatever the server rendered
+			// here — same flush, so there is never a frame showing both or neither.
+			dropServerCopy(target);
 
 			return { target, slot, instance };
 		});

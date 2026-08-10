@@ -35,6 +35,28 @@ covered by `probes/emplace.test.js`. Run `bun run test` before and after changes
    between its own comment and the next slot's, so `priority` holds no matter what
    order things mount in. See `claim`/`release` in `internal.ts`.
 
+## The server path
+
+`src/lib/server.ts` is an optional entry point. `<Emplace>` registers its snippet
+into an `AsyncLocalStorage` store on the server, and the hook renders each snippet
+*after* the page render and splices the HTML into the element carrying
+`data-emplace="name"`. Four things matter:
+
+1. **`render()` from `svelte/server` is lazy.** It returns `{ get head(), get body() }`
+   and the component bodies do not run until a property is read, so collection has
+   to happen after `.body`. That is why the work lives in `transformPageChunk`.
+2. **The store is reached through an indirection** (`registry.ts`). The server entry
+   installs an accessor; nothing module-level holds request state, and
+   `node:async_hooks` never reaches the client bundle.
+3. **The splice needs an empty destination.** It inserts before the matching close
+   tag, which is only unambiguous when the element has no other children — and an
+   empty static element is also the one shape Svelte hydrates leniently.
+4. **`dropServerCopy` runs in the same flush as the mount**, immediately after
+   `mount()` in the effect. Move it later and you get a frame with both copies.
+
+Only plain names are handled server-side; selectors, elements and the body layer
+need a DOM and stay client-only.
+
 ## Test environment
 
 `bun test` runs against **jsdom**, wired up by hand in `probes/setup-bun.js`. Do
