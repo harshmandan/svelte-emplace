@@ -1,6 +1,10 @@
 /** Attribute marking a destination, and the wrapper around a server-rendered copy. */
 export const NAME_ATTR = 'data-emplace';
-export const SSR_ATTR = 'data-emplace-ssr';
+// Comments, not an element: a wrapper <div> is invalid inside phrasing content
+// like <p>, so the parser hoists it out of the destination — taking the server
+// copy with it and splitting the paragraph. Comments are valid anywhere.
+export const SSR_OPEN = 'emplace:ssr';
+export const SSR_CLOSE = '/emplace:ssr';
 
 /** @internal An ordered position reserved inside a destination. */
 export interface Slot {
@@ -86,7 +90,27 @@ export function claim(target: Element, priority: number): { slot: Slot; anchor: 
  * where both or neither are visible.
  */
 export function dropServerCopy(target: Element): void {
-	target.querySelector(`:scope > [${SSR_ATTR}]`)?.remove();
+	let removing = false;
+
+	for (const node of [...target.childNodes]) {
+		if (node.nodeType === 8) {
+			const data = (node as Comment).data;
+
+			if (data === SSR_OPEN) {
+				removing = true;
+				node.remove();
+				continue;
+			}
+
+			if (data === SSR_CLOSE) {
+				node.remove();
+				removing = false;
+				continue;
+			}
+		}
+
+		if (removing) node.remove();
+	}
 }
 
 /** Give up a reserved position. Call it once the content's outro has finished. */

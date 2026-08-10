@@ -15,7 +15,7 @@ test('which destination shapes survive hydration', () => {
 	console.warn = w;
 
 	for (const [id, want] of [['only', 'A'], ['textbefore', 'before B'], ['textafter', 'C after'],
-		['both', 'before D after'], ['elemafter', 'Ex']]) {
+		['both', 'before D after'], ['elemafter', 'Ex'], ['inline', 'before F after']]) {
 		const got = document.querySelector('#' + id).textContent.replace(/\s+/g, ' ').trim();
 		console.log(`  ${id.padEnd(11)} want "${want}"  got "${got}"  ${got === want ? 'OK' : 'BROKEN'}`);
 	}

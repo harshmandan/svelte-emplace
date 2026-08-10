@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { render } from 'svelte/server';
 import Children from './Children.svelte';
-import { NAME_ATTR, SSR_ATTR } from './internal.js';
+import { NAME_ATTR, SSR_CLOSE, SSR_OPEN } from './internal.js';
 import { installStore, type ServerStore } from './registry.js';
 
 const als = new AsyncLocalStorage<ServerStore>();
@@ -65,7 +65,7 @@ export function transformEmplacements(html: string): string {
 			head += piece.head;
 		}
 
-		body = splice(body, name, `<div ${SSR_ATTR} style="display: contents">${inner}</div>`);
+		body = splice(body, name, `<!--${SSR_OPEN}-->${inner}<!--${SSR_CLOSE}-->`);
 	}
 
 	if (head) {
