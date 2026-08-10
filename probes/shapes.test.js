@@ -19,5 +19,7 @@ test('which destination shapes survive hydration', () => {
 		const got = document.querySelector('#' + id).textContent.replace(/\s+/g, ' ').trim();
 		console.log(`  ${id.padEnd(11)} want "${want}"  got "${got}"  ${got === want ? 'OK' : 'BROKEN'}`);
 	}
+	const prose = document.querySelector('#prose').textContent.replace(/\s+/g, ' ').trim();
+	console.log(`  prose        want "use <p data-emplace=\"a\"> as a destination"  got "${prose}"`);
 	console.log('  hydration warnings:', warns.length);
 });

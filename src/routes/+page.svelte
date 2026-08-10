@@ -232,16 +232,23 @@
 			Server rendering <span class="font-normal text-muted">— optional</span>
 		</p>
 		<pre data-nocopy class="mt-3 overflow-x-auto bg-wash p-3 text-sm">
-&lt;!-- src/hooks.server.js --&gt;
+// src/hooks.server.js
 export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 		<p class="mt-3 max-w-2xl text-sm leading-relaxed text-body">
-			With the hook, content aimed at a <em>name</em> is in the first response instead of
-			appearing after hydration. Selectors, elements and the default layer need a DOM, so they
-			stay client-only — which is what a modal wants anyway. This page is prerendered, and
-			prerendering runs hooks, so the line below was placed at build time — view source and it is
-			already in the HTML.
+			That is the whole setup. Content aimed at a <em>name</em> now arrives in the first response
+			instead of appearing after hydration. Selectors, elements and the default layer need a DOM, so
+			they stay client-only — which is what a modal wants anyway.
 		</p>
-		<p data-emplace="ssr-note" class="mt-2 text-sm font-semibold"></p>
+
+		<div class="mt-4 max-w-2xl border border-rule bg-wash p-3">
+			<p class="eyebrow text-muted">Live on this page</p>
+			<p data-emplace="ssr-note" class="mt-2 text-sm font-semibold"></p>
+			<p class="mt-2 text-xs leading-relaxed text-muted">
+				That line is written in a component at the very bottom of this page, and it is sitting in
+				the empty <code>&lt;p data-emplace="ssr-note"&gt;</code> above. It was put there while the
+				page was being built, not by the browser — view source and it is already in the HTML.
+			</p>
+		</div>
 	</div>
 </Section>
 

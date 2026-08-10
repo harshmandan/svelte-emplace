@@ -8,6 +8,8 @@
 <div id="both">before <span data-emplace="d"></span> after</div>
 <div id="elemafter"><span data-emplace="e"></span><b>x</b></div>
 <p id="inline">before <span data-emplace="f"></span> after</p>
+<!-- prose that merely documents the attribute must not be spliced into -->
+<p id="prose">use <code>&lt;p data-emplace="a"&gt;</code> as a destination</p>
 
 <Emplace to="a">A</Emplace>
 <Emplace to="b">B</Emplace>

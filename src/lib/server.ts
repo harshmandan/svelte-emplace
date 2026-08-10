@@ -117,10 +117,21 @@ function splice(html: string, name: string, content: string): string {
 		const found = out.indexOf(needle, at);
 		if (found === -1) return out;
 
-		// End of the opening tag, then its matching close.
 		const tagOpen = out.lastIndexOf('<', found);
 		const tagEnd = out.indexOf('>', found);
-		if (tagOpen === -1 || tagEnd === -1) return out;
+
+		// The attribute has to be inside an opening tag. Without this, prose that
+		// merely mentions `data-emplace="name"` — escaped in a <code> block, say —
+		// matches too, and content gets injected into the documentation.
+		const insideTag = tagOpen !== -1 && out.lastIndexOf('>', found) < tagOpen;
+		const precededBySpace = found > 0 && /\s/.test(out[found - 1]);
+
+		if (!insideTag || !precededBySpace) {
+			at = found + needle.length;
+			continue;
+		}
+
+		if (tagEnd === -1) return out;
 
 		const tag = /^<([a-zA-Z][\w-]*)/.exec(out.slice(tagOpen, tagEnd))?.[1];
 		if (!tag) return out;
