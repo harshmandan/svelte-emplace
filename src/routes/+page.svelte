@@ -241,18 +241,17 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 		</p>
 
 		<div class="mt-4 max-w-2xl border border-rule bg-wash p-3">
-			<p class="eyebrow text-muted">Live on this page</p>
+			<p class="eyebrow text-muted">Demo — server-rendered</p>
 			<p data-emplace="ssr-note" class="mt-2 text-sm font-semibold"></p>
 			<p class="mt-2 text-xs leading-relaxed text-muted">
-				That line is written in a component at the very bottom of this page, and it is sitting in
-				the empty <code>&lt;p data-emplace="ssr-note"&gt;</code> above. It was put there while the
-				page was being built, not by the browser — view source and it is already in the HTML.
+				That text is written near the bottom of this page and aimed at the empty spot above. The
+				server put it there. View source — it is already in the HTML.
 			</p>
 		</div>
 	</div>
 </Section>
 
-<Emplace to="ssr-note">no JavaScript ran to put this here</Emplace>
+<Emplace to="ssr-note">This text was placed by the server, not the browser</Emplace>
 
 <Section id="why" label="Why">
 	<p class="mt-4 max-w-xl text-sm leading-relaxed text-muted">
