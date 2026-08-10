@@ -5,7 +5,7 @@
 	height="64"
 	fill="none"
 	stroke="currentColor"
-	stroke-width="1.5"
+	stroke-width="1"
 	stroke-linejoin="bevel"
 	role="img"
 	aria-label="svelte-emplace"
@@ -16,11 +16,13 @@
 		:root { color: #ededed; --paper: #0a0a0a; }
 	</style>
 
-	<rect width="64" height="64" fill="#0a0a0a" />
+	<!-- stroke="none" matters: without it the rect inherits the root stroke and
+	     draws a light frame around the tile. -->
+	<rect width="64" height="64" fill="#0a0a0a" stroke="none" />
 
 	<!-- Three overlapping layers, drawn back to front. The filled plane is the
 	     layer your content is made in. -->
-	<polygon points="12,41.5 32,34.5 52,41.5 32,48.5" fill="var(--paper)" />
-	<polygon points="12,32 32,25 52,32 32,39" fill="var(--paper)" stroke-dasharray="4 3" />
-	<polygon points="12,22.5 32,15.5 52,22.5 32,29.5" fill="currentColor" />
+	<polygon points="16,38.5 32,33 48,38.5 32,44" fill="var(--paper)" />
+	<polygon points="16,32 32,26.5 48,32 32,37.5" fill="var(--paper)" stroke-dasharray="2.5 2" />
+	<polygon points="16,25.5 32,20 48,25.5 32,31" fill="currentColor" />
 </svg>
