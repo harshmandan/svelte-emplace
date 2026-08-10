@@ -238,10 +238,10 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			With the hook, content aimed at a <em>name</em> is in the first response instead of
 			appearing after hydration. Selectors, elements and the default layer need a DOM, so they
 			stay client-only — which is what a modal wants anyway. This page is prerendered, and
-			prerendering runs hooks, so the line below was placed at build time:
-			<span data-emplace="ssr-note" class="font-semibold"></span> — view source and it is already
-			in the HTML.
+			prerendering runs hooks, so the line below was placed at build time — view source and it is
+			already in the HTML.
 		</p>
+		<p data-emplace="ssr-note" class="mt-2 text-sm font-semibold"></p>
 	</div>
 </Section>
 
