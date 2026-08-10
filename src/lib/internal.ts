@@ -8,6 +8,15 @@ export interface Slot {
 let seq = 0;
 const reserved = new WeakMap<Element, Slot[]>();
 
+/**
+ * `instanceof Element` is false for a node from another window — an iframe has its
+ * own copy of the constructor — so an element target from one would silently fall
+ * through to the body layer. Check the node type instead.
+ */
+function isElement(value: unknown): value is Element {
+	return typeof value === 'object' && value !== null && (value as Node).nodeType === 1;
+}
+
 /** A `to` string is a CSS selector when it starts like one, otherwise a name. */
 const IS_SELECTOR = /^[#.[]/;
 
@@ -17,7 +26,7 @@ const IS_SELECTOR = /^[#.[]/;
  * unresolvable falls back to the body layer rather than throwing.
  */
 export function resolveTargets(to?: string | Element | null): Element[] {
-	if (to instanceof Element) return [to];
+	if (isElement(to)) return [to];
 
 	if (typeof to === 'string' && to !== '') {
 		const selector = IS_SELECTOR.test(to) ? to : `[data-emplace="${to}"]`;
