@@ -1,0 +1,23 @@
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 32 32"
+	width="32"
+	height="32"
+	fill="none"
+	stroke="currentColor"
+	stroke-width="2"
+	stroke-linejoin="bevel"
+	role="img"
+	aria-label="svelte-emplace"
+>
+	<style>
+		:root { color: #0a0a0a; --paper: #ffffff; }
+		@media (prefers-color-scheme: dark) { :root { color: #ededed; --paper: #0b0b0b; } }
+	</style>
+
+	<!-- Small variant: no dashes, no arrow, opaque planes so the stack still reads
+	     at 16px. -->
+	<polygon points="3,22.5 16,18 29,22.5 16,27" fill="var(--paper)" />
+	<polygon points="3,16 16,11.5 29,16 16,20.5" fill="var(--paper)" />
+	<polygon points="3,9.5 16,5 29,9.5 16,14" fill="currentColor" />
+</svg>
