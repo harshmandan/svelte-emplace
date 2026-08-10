@@ -11,13 +11,15 @@
 	aria-label="svelte-emplace"
 >
 	<style>
-		:root { color: #0a0a0a; --paper: #ffffff; }
-		@media (prefers-color-scheme: dark) { :root { color: #ededed; --paper: #0b0b0b; } }
+		/* Fixed palette, not theme-aware: the tile is always dark, so the mark is
+		   always light. `--paper` matches the tile so the planes still occlude. */
+		:root { color: #ededed; --paper: #0a0a0a; }
 	</style>
 
-	<!-- Three overlapping layers, drawn back to front. The lower planes are filled
-	     with the page colour so edges behind them stay hidden. The filled plane is
-	     the layer your content is made in. -->
+	<rect width="64" height="64" fill="#0a0a0a" />
+
+	<!-- Three overlapping layers, drawn back to front. The filled plane is the
+	     layer your content is made in. -->
 	<polygon points="6,44 32,35 58,44 32,53" fill="var(--paper)" />
 	<polygon points="6,32 32,23 58,32 32,41" fill="var(--paper)" stroke-dasharray="4 3" />
 	<polygon points="6,20 32,11 58,20 32,29" fill="currentColor" />

@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="./static/icon-large.svg" alt="svelte-emplace" width="140" />
+  <img src="./static/icon-large.svg" alt="svelte-emplace" width="100" />
 
   <h1>svelte-emplace</h1>
 
