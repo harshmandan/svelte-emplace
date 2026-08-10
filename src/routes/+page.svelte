@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import '../app.css';
+	import { Emplace } from '$lib';
 	import Section from './parts/Section.svelte';
 	import Compare from './parts/Compare.svelte';
 	import ModalExample from './examples/ModalExample.svelte';
@@ -225,7 +226,26 @@
 			</p>
 		</div>
 	</div>
+
+	<div class="mt-px border border-rule bg-paper p-4 sm:p-5">
+		<p class="text-base font-semibold">
+			Server rendering <span class="font-normal text-muted">— optional</span>
+		</p>
+		<pre data-nocopy class="mt-3 overflow-x-auto bg-wash p-3 text-sm">
+&lt;!-- src/hooks.server.js --&gt;
+export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
+		<p class="mt-3 max-w-2xl text-sm leading-relaxed text-body">
+			With the hook, content aimed at a <em>name</em> is in the first response instead of
+			appearing after hydration. Selectors, elements and the default layer need a DOM, so they
+			stay client-only — which is what a modal wants anyway. This page is prerendered, and
+			prerendering runs hooks, so the line below was placed at build time:
+			<span data-emplace="ssr-note" class="font-semibold"></span> — view source and it is already
+			in the HTML.
+		</p>
+	</div>
 </Section>
+
+<Emplace to="ssr-note">no JavaScript ran to put this here</Emplace>
 
 <Section id="why" label="Why">
 	<p class="mt-4 max-w-xl text-sm leading-relaxed text-muted">
