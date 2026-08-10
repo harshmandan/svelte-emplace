@@ -11,6 +11,13 @@ package exists: attachments and measurements see the real parent on their first
 run, and nothing is re-parented, so iframes, video, focus and CSS animations are
 not reset. Any change that relocates DOM after mount defeats the purpose.
 
+One deliberate exception: the `emplace` attachment (`emplace.ts`) re-parents an
+existing element, svelte-portal-style, as a shorthand for single-element cases.
+An attachment only ever receives an element that already exists, so
+create-at-destination is impossible there — do not try to "fix" it, and do not
+let its existence justify moving DOM anywhere else. It shares `claim`/`release`,
+so its ordering interoperates with the component's `priority`.
+
 ## Four things found by probing, not reasoning
 
 Each was measured, each silently breaks something if reverted, and each is
@@ -101,3 +108,8 @@ The library build (`bun run build`) and the probes do not involve it.
 fallback, multi-match), attachment timing and teardown, the closing animation
 including real keyframes, reopen cleanliness, snippet swapping, priority ordering
 under late mounts, and error bridging on both update and first render.
+
+`probes/attach.test.js` covers the `emplace` attachment: the move into a named
+destination and the body layer, wrapper-free placement, attachment-order
+visibility of the destination, priority interop with `<Emplace>` in one target,
+retargeting when `to` changes, outro-at-destination, and reopen cleanliness.

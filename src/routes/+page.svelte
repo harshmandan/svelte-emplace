@@ -340,7 +340,11 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 
 &lt;Emplace to="toolbar" priority=&#123;10&#125;&gt;
   …
-&lt;/Emplace&gt;</pre>
+&lt;/Emplace&gt;
+
+&lt;div &#123;@attach emplace('tips')&#125;&gt;
+  …
+&lt;/div&gt;</pre>
 		</div>
 		<dl class="min-w-0 bg-paper p-4 text-sm sm:p-6">
 			<dt class="text-base font-semibold">No <code>to</code></dt>
@@ -360,6 +364,11 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			<dd class="mt-1 text-body">Renders into that element.</dd>
 			<dt class="mt-4 text-base font-semibold"><code>priority</code></dt>
 			<dd class="mt-1 text-body">Higher values render first.</dd>
+			<dt class="mt-4 text-base font-semibold"><code>emplace(to, priority)</code></dt>
+			<dd class="mt-1 text-body">
+				The same targeting as an attachment, for an element you already have. It moves the
+				element, so use the component when anything inside must not reset. Needs Svelte 5.29.
+			</dd>
 		</dl>
 	</div>
 </Section>
@@ -378,6 +387,15 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			<p class="mt-2 text-sm leading-relaxed text-body">
 				The target is looked up when the content mounts. If it is not in the DOM yet, the
 				content falls back to the <code>&lt;body&gt;</code> container and stays there.
+			</p>
+		</div>
+		<div class="min-w-0 bg-paper p-4 sm:p-5">
+			<p class="text-base font-semibold">The attachment moves the element</p>
+			<p class="mt-2 text-sm leading-relaxed text-body">
+				An attachment receives an element that already exists, so
+				<code>&#123;@attach emplace('tips')&#125;</code> re-parents it — the trade-off the
+				component avoids. Handy for one element; a node can only be in one place, so the first
+				matching target wins.
 			</p>
 		</div>
 	</div>

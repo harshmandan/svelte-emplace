@@ -96,6 +96,35 @@ Put the transition on an element inside `<Emplace>`. Intro and outro both play, 
 
 Svelte does not allow `transition:` on a component, so it cannot go on `<Emplace>` itself.
 
+## The `emplace` attachment
+
+For a single element you already have, the `emplace` attachment does the same job without a
+wrapper component:
+
+```svelte
+<script>
+  import { emplace } from 'svelte-emplace';
+</script>
+
+<div class="tip" {@attach emplace('tips')}>…</div>
+```
+
+The arguments mirror the component: a name, a CSS selector, or an element — omit it for the
+`<body>` container — and an optional priority, `emplace('toolbar', 10)`, which sorts against
+`<Emplace>` content in the same target.
+
+One difference is structural: an attachment receives an element that already exists, so the
+element is created in place and **moved** to its destination — the re-parenting `<Emplace>`
+avoids. That is fine for a tooltip or an overlay; when the content holds live state (an iframe,
+a video, a focused input) or should be server-rendered, use the component. Two smaller
+consequences:
+
+- A node can only be in one place. If several elements match a name, the first match is used.
+- Attachments run in declaration order, so ones written after `{@attach emplace(…)}` already see
+  the element at its destination.
+
+`{@attach}` needs Svelte 5.29 or newer.
+
 ## Server rendering (optional)
 
 Off by default. Add the hook and content aimed at a **name** is rendered into that
@@ -135,10 +164,13 @@ hydration, and you get one warning telling you so.
 | `priority` | `0` | higher renders first within the same target |
 | `children` | — | content to render at the target |
 
+The `emplace(to?, priority?)` attachment takes the same two values as arguments.
+
 ## Notes
 
-- No server-side rendering: content mounts in the browser only. Anything that must be in the
-  initial HTML belongs in your layout instead.
+- Server rendering is opt-in. Without the hook, content mounts in the browser only. The
+  attachment is always client-only: the element renders at its source position in the server
+  HTML and moves when the page hydrates.
 - `to` is resolved once, when the content mounts. If the target is not in the DOM yet, the
   content falls back to the `<body>` container and stays there.
 
