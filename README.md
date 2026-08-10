@@ -7,6 +7,8 @@
 [![version](https://img.shields.io/npm/v/svelte-emplace.svg)](https://www.npmjs.com/package/svelte-emplace)
 [![downloads](http://img.shields.io/npm/dm/svelte-emplace.svg)](https://www.npmjs.com/package/svelte-emplace)
 
+[**Examples and docs →**](https://harshmandan.github.io/svelte-emplace/)
+
 </div>
 
 **The best portal for Svelte 5.** Put a modal, tooltip or toast anywhere on the page. Content is
