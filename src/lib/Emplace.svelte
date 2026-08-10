@@ -40,6 +40,7 @@
 	// The empty guard is load-bearing: while the source is being torn down this
 	// runs once more with `children` undefined, and writing that through would
 	// blank the destination before any outro could play.
+	// svelte-ignore state_referenced_locally
 	const box = $state({ children });
 	$effect(() => {
 		if (children) box.children = children;
