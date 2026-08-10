@@ -361,10 +361,10 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 <Section id="limits" label="Notes">
 	<div class="mt-6 grid grid-cols-1 gap-px border border-rule bg-rule md:grid-cols-2">
 		<div class="min-w-0 bg-paper p-4 sm:p-5">
-			<p class="text-base font-semibold">No server rendering</p>
+			<p class="text-base font-semibold">Server rendering is opt-in</p>
 			<p class="mt-2 text-sm leading-relaxed text-body">
-				Content mounts in the browser only. Anything that must be in the server-rendered HTML
-				belongs in your layout instead.
+				Without the hook, content mounts in the browser only. With it, names are in the first
+				response but the destination element has to be empty, and the page is no longer streamed.
 			</p>
 		</div>
 		<div class="min-w-0 bg-paper p-4 sm:p-5">
