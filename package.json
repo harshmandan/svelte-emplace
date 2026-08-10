@@ -40,7 +40,7 @@
 		"build": "svelte-package -i src/lib -o dist",
 		"build:site": "vite build",
 		"preview": "vite preview",
-		"test": "bun probes/ssr.mjs && bun test --conditions=browser",
+		"test": "bun probes/ssr.mjs && bun probes/shapes.mjs && bun test --conditions=browser",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"prepare": "svelte-kit sync",
 		"prepack": "bun run build"
