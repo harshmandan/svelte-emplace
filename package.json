@@ -1,28 +1,17 @@
 {
 	"name": "svelte-emplace",
 	"version": "0.1.0",
-	"devDependencies": {
-		"@sveltejs/package": "^2.5.8",
-		"jsdom": "^30.0.1",
-		"svelte": "^5.56.8",
-		"svelte-check": "^4.7.5",
-		"typescript": "^5.9.3"
-	},
-	"peerDependencies": {
-		"svelte": "^5.0.0"
-	},
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js",
-			"default": "./dist/index.js"
-		}
-	},
 	"description": "Portals for Svelte 5 that never relocate your DOM. Content is created at its destination, so measurements, focus and close animations are right the first time.",
-	"files": [
-		"dist",
-		"!dist/**/*.test.*"
-	],
+	"license": "MIT",
+	"homepage": "https://harshmandan.github.io/svelte-emplace/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/harshmandan/svelte-emplace.git"
+	},
+	"bugs": {
+		"url": "https://github.com/harshmandan/svelte-emplace/issues"
+	},
+	"type": "module",
 	"keywords": [
 		"svelte",
 		"portal",
@@ -31,12 +20,32 @@
 		"tooltip",
 		"overlay"
 	],
-	"license": "MIT",
+	"files": [
+		"dist",
+		"!dist/**/*.test.*"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
 	"scripts": {
 		"build": "svelte-package -i src/lib -o dist",
 		"test": "bun test --conditions=browser",
-		"check": "svelte-check --tsconfig ./tsconfig.json"
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"prepublishOnly": "bun run build"
 	},
-	"sideEffects": false,
-	"type": "module"
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "^2.5.8",
+		"jsdom": "^30.0.1",
+		"svelte": "^5.56.8",
+		"svelte-check": "^4.7.5",
+		"typescript": "^5.9.3"
+	},
+	"sideEffects": false
 }
