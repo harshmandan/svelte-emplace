@@ -65,6 +65,14 @@ realm — Bun defines its own, and jsdom rejects a foreign-realm event.
   directives on any component (upstream issue 11452).
 - No server rendering. Emplaced content is client-only by design — see README.
 
+## Site
+
+`src/routes` is the landing page — a SvelteKit app (adapter-static, prerendered)
+deployed to GitHub Pages by `deploy.yml`. It imports the library through `$lib`,
+so the live demos run against the real source: a regression in `src/lib` breaks
+the demos visibly. `bun run dev` to work on it, `bun run build:site` to build.
+The library build (`bun run build`) and the probes do not involve it.
+
 ## Probes
 
 `probes/emplace.test.js` covers destination resolution (name, selector, element,

@@ -1,0 +1,112 @@
+@import 'tailwindcss';
+
+:root {
+	color-scheme: light dark;
+	--paper: #ffffff;
+	--ink: #0a0a0a;
+	--rule: #d8d8d8;
+	--seam: #ededed;
+	--body: #3d3d3d;
+	--muted: #6f6f6f;
+	--wash: #f5f5f5;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--paper: #0b0b0b;
+		--ink: #ededed;
+		--rule: #2b2b2b;
+		--seam: #1c1c1c;
+		--body: #c9c9c9;
+		--muted: #949494;
+		--wash: #151515;
+	}
+}
+
+@theme inline {
+	--color-paper: var(--paper);
+	--color-ink: var(--ink);
+	--color-rule: var(--rule);
+	--color-seam: var(--seam);
+	--color-body: var(--body);
+	--color-muted: var(--muted);
+	--color-wash: var(--wash);
+	--font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* One notch between the original (16px root, mostly 12px copy) and the pure
+   one-step size bump (16px root, 14px copy): every rem-based size scales. */
+html {
+	font-size: 15px;
+}
+
+body {
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	-webkit-font-smoothing: antialiased;
+}
+
+.eyebrow {
+	font-size: 11px;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+pre {
+	tab-size: 2;
+}
+code {
+	background: var(--wash);
+	padding: 0.1em 0.34em;
+	color: var(--ink);
+}
+pre code {
+	background: none;
+	padding: 0;
+}
+
+.copy-wrap {
+	position: relative;
+}
+.copy-wrap pre {
+	padding-right: 72px;
+}
+.copy-btn {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	padding: 2px 4px;
+	border: 0;
+	background: var(--paper);
+	color: var(--muted);
+	font: inherit;
+	font-size: 11px;
+	letter-spacing: 0.12em;
+	cursor: pointer;
+}
+.copy-wrap pre.bg-wash + .copy-btn {
+	background: var(--wash);
+}
+.copy-btn:hover {
+	color: var(--ink);
+}
+/* Single-line snippets: center the button vertically. */
+.copy-btn.copy-mid {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+/* Sample buttons rendered inside demo targets. Kept to one short class so the
+   serialized markup in the inspector demo stays readable. */
+.chip {
+	border: 1px solid var(--rule);
+	background: var(--paper);
+	padding: 2px 10px;
+	font: inherit;
+	font-size: 0.875rem;
+}
+
+a:focus-visible,
+button:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 2px;
+}

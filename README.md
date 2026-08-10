@@ -1,19 +1,20 @@
 <div align="center">
 
-  <img src="./site/icon-large.svg" alt="svelte-emplace" width="280" />
+  <img src="./static/icon-large.svg" alt="svelte-emplace" width="280" />
 
   <h1>svelte-emplace</h1>
 
 [![version](https://img.shields.io/npm/v/svelte-emplace.svg)](https://www.npmjs.com/package/svelte-emplace)
 [![downloads](http://img.shields.io/npm/dm/svelte-emplace.svg)](https://www.npmjs.com/package/svelte-emplace)
 
-[**Examples and docs →**](https://harshmandan.github.io/svelte-emplace/)
+[**Examples and docs →**](https://svelte-emplace.harsh.ink)
 
 </div>
 
-**The best portal for Svelte 5.** Put a modal, tooltip or toast anywhere on the page. Content is
-mounted straight into its target, so positions, focus and closing animations are right the first
-time. **180 lines, zero dependencies.**
+A portal component for Svelte 5. `<Emplace>` mounts its children directly into a target element
+elsewhere in the DOM, instead of rendering them in place and moving the node. Because nothing is
+re-parented, positioning code measures the right parent on its first run, transitions play at the
+target, and iframes, video and input state are never reset. 180 lines, no dependencies.
 
 ## Quick start
 
@@ -33,12 +34,12 @@ npm i svelte-emplace
 </Emplace>
 ```
 
-One import, one component, no props. Content goes into a shared layer at the end of `<body>`,
-which is what a modal or a toast wants.
+Without a `to` prop, content renders into a shared container at the end of `<body>` — the usual
+place for modals and toasts.
 
-## Choosing a destination
+## Targets
 
-Mark a spot in your own markup, then aim at it by name:
+Mark an element with `data-emplace` and refer to it by name:
 
 ```svelte
 <h1 data-emplace="title"></h1>
@@ -48,33 +49,35 @@ Mark a spot in your own markup, then aim at it by name:
 <Emplace to="title">{data.title}</Emplace>
 ```
 
-`to` also takes a CSS selector or an element:
+`to` also accepts a CSS selector or an element reference:
 
 ```svelte
 <Emplace to="#tooltips">…</Emplace>
 <Emplace to={element}>…</Emplace>
 ```
 
-A string starting with `#`, `.` or `[` is treated as a selector; anything else is a name,
-matching `[data-emplace="name"]`. If nothing matches, content falls back to the body layer.
+A string starting with `#`, `.` or `[` is treated as a selector; any other string is a name,
+matching `[data-emplace="name"]`. If no target matches, content falls back to the `<body>`
+container.
 
-If several elements share one name, the content renders into **all** of them — one source
-feeding a mobile and a desktop header at once.
+If several elements share a name, the content renders into **all** of them — for example, a
+mobile and a desktop header filled from the same source.
 
 ## Ordering
 
-Several parts of your app can fill one spot. `priority` fixes the order: higher sorts first,
-ties keep registration order, and it holds regardless of what mounts when.
+When several `<Emplace>` components target the same element, `priority` sets the order: higher
+renders first, ties keep registration order, and the order holds no matter when each component
+mounts.
 
 ```svelte
 <Emplace to="toolbar" priority={10}><button>Save</button></Emplace>
 <Emplace to="toolbar"><button>Cancel</button></Emplace>
 ```
 
-## Errors
+## Error boundaries
 
-Content renders at its destination, but a `<svelte:boundary>` in the tree that *wrote* it still
-catches its errors, so your own fallback shows and the rest of the page keeps working.
+Content renders at the target, but errors still propagate to the `<svelte:boundary>` around the
+`<Emplace>` that created it, so your fallback renders and the rest of the page keeps working:
 
 ```svelte
 <svelte:boundary onerror={report}>
@@ -85,8 +88,7 @@ catches its errors, so your own fallback shows and the rest of the page keeps wo
 
 ## Transitions
 
-Put the transition on your own element inside `<Emplace>`. Opening and closing both animate, at
-the destination.
+Put the transition on an element inside `<Emplace>`. Intro and outro both play, at the target:
 
 ```svelte
 <Emplace><div transition:fly={{ y: 20 }}>…</div></Emplace>
@@ -98,16 +100,16 @@ Svelte does not allow `transition:` on a component, so it cannot go on `<Emplace
 
 | prop | default | |
 |---|---|---|
-| `to` | — | a name, a CSS selector, or an element. Omit for the body layer |
-| `priority` | `0` | higher sorts first at the destination |
-| `children` | — | what gets emplaced |
+| `to` | — | target name, CSS selector, or element. Omit for the `<body>` container |
+| `priority` | `0` | higher renders first within the same target |
+| `children` | — | content to render at the target |
 
 ## Notes
 
-- Emplaced content is client only. A modal opens on a click and a tooltip on a hover, so there is
-  nothing to send with the first page load. For text in the first HTML, use your layout.
-- `to` is resolved once, when the content is created. If that element is not in the page yet, the
-  content goes to the body layer and stays there.
+- No server-side rendering: content mounts in the browser only. Anything that must be in the
+  initial HTML belongs in your layout instead.
+- `to` is resolved once, when the content mounts. If the target is not in the DOM yet, the
+  content falls back to the `<body>` container and stays there.
 
 ## License
 
