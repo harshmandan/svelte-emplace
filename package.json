@@ -39,7 +39,7 @@
 		"test": "bun test --conditions=browser",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"prepare": "svelte-kit sync",
-		"prepublishOnly": "bun run build"
+		"prepack": "bun run build"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
