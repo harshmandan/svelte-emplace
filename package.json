@@ -1,9 +1,9 @@
 {
 	"name": "svelte-emplace",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Portals for Svelte 5 that never relocate your DOM. Content is created at its destination, so measurements, focus and close animations are right the first time.",
 	"license": "MIT",
-	"homepage": "https://harshmandan.github.io/svelte-emplace/",
+	"homepage": "https://svelte-emplace.harsh.ink",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/harshmandan/svelte-emplace.git"
