@@ -16,17 +16,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      # No BASE_PATH on purpose. Setting it hardcodes `assets` to "/svelte-emplace"
+      # in the page, which 404s on the custom domain. Left unset, `base` is derived
+      # from location at runtime and assets stay relative, so one artifact serves
+      # correctly from the domain root and from github.io/<repo>/ alike.
+      - name: Build static site
+        run: bun run build:site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      # The site is a single static file with relative links, so it needs no
-      # build step and no base path — it works at /<repo>/ as well as at a root.
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
       - id: deployment
         uses: actions/deploy-pages@v4
