@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "svelte-emplace",
-      "dependencies": {
-        "esm-env": "^1.2.2",
-      },
       "devDependencies": {
         "@sveltejs/package": "^2.5.8",
         "jsdom": "^30.0.1",

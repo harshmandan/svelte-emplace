@@ -1,9 +1,28 @@
 {
 	"name": "svelte-emplace",
 	"version": "0.1.0",
+	"devDependencies": {
+		"@sveltejs/package": "^2.5.8",
+		"jsdom": "^30.0.1",
+		"svelte": "^5.56.8",
+		"svelte-check": "^4.7.5",
+		"typescript": "^5.9.3"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
 	"description": "Portals for Svelte 5 that never relocate your DOM. Content is created at its destination, so measurements, focus and close animations are right the first time.",
-	"license": "MIT",
-	"type": "module",
+	"files": [
+		"dist",
+		"!dist/**/*.test.*"
+	],
 	"keywords": [
 		"svelte",
 		"portal",
@@ -12,34 +31,12 @@
 		"tooltip",
 		"overlay"
 	],
-	"files": [
-		"dist",
-		"!dist/**/*.test.*"
-	],
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js",
-			"default": "./dist/index.js"
-		}
-	},
+	"license": "MIT",
 	"scripts": {
 		"build": "svelte-package -i src/lib -o dist",
 		"test": "bun test --conditions=browser",
 		"check": "svelte-check --tsconfig ./tsconfig.json"
 	},
-	"peerDependencies": {
-		"svelte": "^5.0.0"
-	},
-	"devDependencies": {
-		"@sveltejs/package": "^2.5.8",
-		"jsdom": "^30.0.1",
-		"svelte": "^5.56.8",
-		"svelte-check": "^4.7.5",
-		"typescript": "^5.9.3"
-	},
 	"sideEffects": false,
-	"dependencies": {
-		"esm-env": "^1.2.2"
-	}
+	"type": "module"
 }

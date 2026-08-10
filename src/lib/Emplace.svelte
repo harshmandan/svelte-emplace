@@ -16,7 +16,6 @@
 	throwing.
 -->
 <script lang="ts">
-	import { BROWSER } from 'esm-env';
 	import { mount, unmount, type Snippet } from 'svelte';
 	import Boundary from './Boundary.svelte';
 	import { claim, release, resolveTargets } from './internal.js';
@@ -46,37 +45,38 @@
 		if (children) box.children = children;
 	});
 
-	if (BROWSER) {
-		// Mounting inside an effect — and unmounting in *its* cleanup — is what
-		// makes closing animations work. Doing the same work in `onDestroy` runs
-		// too late: the outro is suppressed and the content vanishes instantly.
-		$effect(() => {
-			const mounted = resolveTargets(to).map((target) => {
-				const { slot, anchor } = claim(target, priority);
+	// Mounting inside an effect — and unmounting in *its* cleanup — is what makes
+	// closing animations work. Doing the same work in `onDestroy` runs too late: the
+	// outro is suppressed and the content vanishes instantly.
+	//
+	// No browser guard is needed here: Svelte's server compiler strips effect
+	// bodies, so none of this is emitted for the server in the first place.
+	$effect(() => {
+		const mounted = resolveTargets(to).map((target) => {
+			const { slot, anchor } = claim(target, priority);
 
-				const instance = mount(Boundary, {
-					target,
-					anchor,
-					intro: true,
-					props: {
-						box,
-						// Deferred: the error can arrive while a render pass is still in
-						// flight, and state cannot be written during one.
-						onerror: (error: unknown) => queueMicrotask(() => (caught = error))
-					}
-				});
-
-				return { target, slot, instance };
+			const instance = mount(Boundary, {
+				target,
+				anchor,
+				intro: true,
+				props: {
+					box,
+					// Deferred: the error can arrive while a render pass is still in
+					// flight, and state cannot be written during one.
+					onerror: (error: unknown) => queueMicrotask(() => (caught = error))
+				}
 			});
 
-			return () => {
-				for (const { target, slot, instance } of mounted) {
-					// Hold the reserved position until the outro has finished.
-					Promise.resolve(unmount(instance, { outro: true })).then(() => release(target, slot));
-				}
-			};
+			return { target, slot, instance };
 		});
-	}
+
+		return () => {
+			for (const { target, slot, instance } of mounted) {
+				// Hold the reserved position until the outro has finished.
+				Promise.resolve(unmount(instance, { outro: true })).then(() => release(target, slot));
+			}
+		};
+	});
 
 	// Rethrowing in an effect hands the error to the nearest `<svelte:boundary>`
 	// above this component — the tree that wrote the content, not the destination.
