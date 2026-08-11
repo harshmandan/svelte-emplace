@@ -12,7 +12,7 @@ run, and nothing is re-parented, so iframes, video, focus and CSS animations are
 not reset. Any change that relocates DOM after mount defeats the purpose.
 
 One deliberate exception: the `emplace` attachment (`emplace.ts`) re-parents an
-existing element, svelte-portal-style, as a shorthand for single-element cases.
+existing element, as a shorthand for single-element cases.
 An attachment only ever receives an element that already exists, so
 create-at-destination is impossible there — do not try to "fix" it, and do not
 let its existence justify moving DOM anywhere else. It shares `claim`/`release`,

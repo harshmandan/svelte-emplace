@@ -209,7 +209,7 @@ test('E15: Svelte itself skips outros in nested blocks — parity, not a defect'
 });
 
 test('E16: a bare string is a plain querySelector, so a tag name matches', () => {
-	// The svelte-portal migration case: `to` names a custom element directly.
+	// `to` names a custom element directly.
 	document.body.innerHTML = '<question-bottom-container></question-bottom-container>';
 	mount(Modal, { target: document.body, props: { to: 'question-bottom-container' } });
 	flushSync();
@@ -236,6 +236,6 @@ test('E19: the warning for one destination is not repeated', () => {
 });
 
 test('E18: the component is the default export as well as a named one', () => {
-	// The svelte-portal import shape: `import Emplace from 'svelte-emplace'`.
+	// `import Emplace from 'svelte-emplace'`.
 	expect(EmplaceDefault).toBe(Emplace);
 });
