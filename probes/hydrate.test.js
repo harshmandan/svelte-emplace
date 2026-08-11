@@ -6,6 +6,8 @@ import SsrApp from './fixtures/SsrApp.svelte';
 // Real server output, produced by `bun probes/ssr.mjs`.
 const ssr = JSON.parse(readFileSync('probes/.out/ssr.json', 'utf8'));
 
+const texts = (sel) => [...document.querySelectorAll(sel)].map((n) => n.textContent.trim());
+
 let noise;
 let saved;
 
@@ -44,15 +46,36 @@ test('S2: hydrates with no mismatch, no duplication, server copy handed over', (
 		'Cancel'
 	]);
 	expect(document.querySelector('[data-emplace-ssr]')).toBe(null);
-	expect(noise).toEqual([]);
+	// `to="#not-a-name"` is client-only by design; its warning is asserted in S3.
+	expect(noise.filter((n) => !n.includes('#not-a-name'))).toEqual([]);
 });
 
 test('S3: a client-only target still works after hydration', () => {
 	document.body.innerHTML = ssr.body;
 	hydrate(SsrApp, { target: document.body, props: { title: 'Quarterly report' } });
 	flushSync();
-	// `to="#not-a-name"` matches nothing, so it lands in the body layer.
+	// `to="#not-a-name"` matches nothing, so it lands in the body layer — and says so.
 	expect(document.querySelector('[data-emplace-layer]').textContent).toContain('client only');
-	expect(noise).toEqual([]);
+	expect(noise.filter((n) => !n.includes('#not-a-name'))).toEqual([]);
+});
+
+test('S4: `multiple` is server-rendered into every destination, and hands over once each', () => {
+	document.body.innerHTML = ssr.body;
+	expect(texts('footer i')).toEqual(['BADGE', 'BADGE']);
+
+	hydrate(SsrApp, { target: document.body, props: { title: 'Quarterly report' } });
+	flushSync();
+	expect(texts('footer i')).toEqual(['BADGE', 'BADGE']);
+});
+
+test('S5: without it, the server fills the one destination the client will mount into', () => {
+	document.body.innerHTML = ssr.body;
+	// The second <b> must stay empty: nothing would ever come along to drop a
+	// server copy there, so it would survive hydration as a duplicate.
+	expect(texts('aside b')).toEqual(['SOLO', '']);
+
+	hydrate(SsrApp, { target: document.body, props: { title: 'Quarterly report' } });
+	flushSync();
+	expect(texts('aside b')).toEqual(['SOLO', '']);
 });
 

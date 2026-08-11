@@ -59,20 +59,33 @@ test('E4: an element can be passed directly', () => {
 	expect(document.querySelector('#direct .body')).toBeTruthy();
 });
 
-test('E5: an unresolvable destination falls back to the body layer', () => {
+test('E5: an unresolvable destination falls back to the body layer, and says so', () => {
 	mount(Modal, { target: document.body, props: { to: '#nope' } });
 	flushSync();
 	expect(document.querySelector('[data-emplace-layer] .body')).toBeTruthy();
+	expect(noise.length).toBe(1);
+	expect(noise[0]).toContain('to="#nope"');
+	expect(noise[0]).toContain('matched no element');
+});
+
+test('E6: `multiple` feeds every element matching the name', () => {
+	document.body.innerHTML =
+		'<div id="a" data-emplace="title"></div><div id="b" data-emplace="title"></div>';
+	mount(Modal, { target: document.body, props: { to: '@title', multiple: true } });
+	flushSync();
+	expect(document.querySelector('#a .body')).toBeTruthy();
+	expect(document.querySelector('#b .body')).toBeTruthy();
 	expect(noise).toEqual([]);
 });
 
-test('E6: one source feeds every element matching the name', () => {
+test('E6b: without it, one destination is filled', () => {
 	document.body.innerHTML =
 		'<div id="a" data-emplace="title"></div><div id="b" data-emplace="title"></div>';
 	mount(Modal, { target: document.body, props: { to: '@title' } });
 	flushSync();
 	expect(document.querySelector('#a .body')).toBeTruthy();
-	expect(document.querySelector('#b .body')).toBeTruthy();
+	expect(document.querySelector('#b .body')).toBe(null);
+	expect(noise).toEqual([]);
 });
 
 test('E7: attachment runs against the destination, and tears down on close', async () => {
@@ -209,7 +222,17 @@ test('E17: an invalid selector falls back to the body layer instead of throwing'
 	mount(Modal, { target: document.body, props: { to: '((' } });
 	flushSync();
 	expect(document.querySelector('[data-emplace-layer] .body')).toBeTruthy();
-	expect(noise).toEqual([]);
+	expect(noise.length).toBe(1);
+	expect(noise[0]).toContain('is not a valid selector');
+});
+
+test('E19: the warning for one destination is not repeated', () => {
+	mount(Modal, { target: document.body, props: { to: '#said-once' } });
+	flushSync();
+	document.body.innerHTML = '';
+	mount(Modal, { target: document.body, props: { to: '#said-once' } });
+	flushSync();
+	expect(noise.length).toBe(1);
 });
 
 test('E18: the component is the default export as well as a named one', () => {

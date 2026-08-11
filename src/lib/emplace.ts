@@ -8,11 +8,10 @@ import { claim, release, resolveTargets } from './internal.js';
  * ```
  *
  * `to` and `priority` mean the same as on the component, and ordering is shared
- * with it. Two differences follow from being an attachment. The element is
- * created in place and *moved* to its destination — an attachment only receives
- * an element that already exists — so content that a move resets (iframes,
- * video, a focused input) belongs in the component. And one node can only be in
- * one place, so when several elements match a name, the first match is used.
+ * with it. The difference is that the element is created in place and *moved* to
+ * its destination — an attachment only receives an element that already exists —
+ * so content that a move resets (iframes, video, a focused input) belongs in the
+ * component.
  *
  * `{@attach}` needs Svelte 5.29.
  */

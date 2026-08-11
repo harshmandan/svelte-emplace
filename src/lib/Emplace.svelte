@@ -14,6 +14,13 @@
 	`<body>`, or pass `@name` for `[data-emplace="name"]`, a CSS selector, or an
 	element. Anything unresolvable falls back to the body layer rather than
 	throwing.
+
+	`multiple` fills every element `to` matches — a mobile and a desktop header
+	from one source:
+
+	```svelte
+	<Emplace to="@title" multiple>{data.title}</Emplace>
+	```
 -->
 <script lang="ts">
 	import { getAllContexts, mount, unmount, type Snippet } from 'svelte';
@@ -26,10 +33,12 @@
 		to?: string | Element | null;
 		/** Higher sorts first at the destination. Ties keep registration order. */
 		priority?: number;
+		/** Fill every element `to` matches, not just the first. */
+		multiple?: boolean;
 		children?: Snippet;
 	}
 
-	let { to, priority = 0, children }: Props = $props();
+	let { to, priority = 0, multiple = false, children }: Props = $props();
 
 	let caught: unknown = $state(null);
 
@@ -42,7 +51,7 @@
 		const name = typeof to === 'string' ? emplaceName(to) : null;
 		if (name) {
 			// svelte-ignore state_referenced_locally
-			serverRegister({ name, priority, children, context: getAllContexts() });
+			serverRegister({ name, priority, multiple, children, context: getAllContexts() });
 		}
 	}
 
@@ -67,7 +76,7 @@
 	// No browser guard is needed here: Svelte's server compiler strips effect
 	// bodies, so none of this is emitted for the server in the first place.
 	$effect(() => {
-		const mounted = resolveTargets(to).map((target) => {
+		const mounted = resolveTargets(to, multiple).map((target) => {
 			const { slot, anchor } = claim(target, priority);
 
 			const instance = mount(Boundary, {

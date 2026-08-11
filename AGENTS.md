@@ -1,7 +1,7 @@
 # AGENTS.md
 
-Read this before changing `src/lib`. It is 180 lines of code and four of them are
-load-bearing in ways that look arbitrary.
+Read this before changing `src/lib`. It is around 220 lines of code and four of
+them are load-bearing in ways that look arbitrary.
 
 ## What this package is
 
@@ -60,6 +60,11 @@ into an `AsyncLocalStorage` store on the server, and the hook renders each snipp
    empty static element is also the one shape Svelte hydrates leniently.
 4. **`dropServerCopy` runs in the same flush as the mount**, immediately after
    `mount()` in the effect. Move it later and you get a frame with both copies.
+5. **The splice must fill exactly the destinations the client will mount into.**
+   `dropServerCopy` only runs where something mounts, so a server copy written
+   anywhere else has nothing to remove it and survives hydration as a duplicate.
+   That is why `splice` takes separate `first` and `rest` content and only fills
+   past the first match for sources marked `multiple`. `S4`/`S5` pin both halves.
 
 Only `@name` targets are handled server-side; selectors, elements and the body
 layer need a DOM and stay client-only. (`@` marks a name because CSS reserves it
@@ -94,7 +99,8 @@ realm — Bun defines its own, and jsdom rejects a foreign-realm event.
   it is not ours to fix. `E15` pins it so a future contributor does not chase it.
 - `transition:` cannot be placed on `<Emplace>`; Svelte rejects transition
   directives on any component (upstream issue 11452).
-- No server rendering. Emplaced content is client-only by design — see README.
+- Server rendering covers `@name` only. Selectors, elements and the body layer
+  need a DOM, so they stay client-only — see README.
 
 ## Site
 
@@ -107,7 +113,7 @@ The library build (`bun run build`) and the probes do not involve it.
 ## Probes
 
 `probes/emplace.test.js` covers destination resolution (name, selector, element,
-fallback, multi-match), attachment timing and teardown, the closing animation
+fallback and its warning, `multiple`), attachment timing and teardown, the closing animation
 including real keyframes, reopen cleanliness, snippet swapping, priority ordering
 under late mounts, and error bridging on both update and first render.
 

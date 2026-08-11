@@ -14,7 +14,7 @@
 A portal component for Svelte 5. `<Emplace>` mounts its children directly into a target element
 elsewhere in the DOM, instead of rendering them in place and moving the node. Because nothing is
 re-parented, positioning code measures the right parent on its first run, transitions play at the
-target, and iframes, video and input state are never reset. 180 lines, no dependencies.
+target, and iframes, video and input state are never reset. Around 220 lines, no dependencies.
 
 ## Quick start
 
@@ -63,10 +63,21 @@ and an element reference is used as-is:
 
 The `@` prefix is unambiguous because CSS reserves `@` for at-rules — no selector can start
 with it. If no target matches (or the selector is invalid), content falls back to the `<body>`
-container.
+container and a warning names the `to` that did not resolve.
 
-If several elements share a name, the content renders into **all** of them — for example, a
-mobile and a desktop header filled from the same source.
+## Several targets at once
+
+`multiple` gives every element `to` matches its own live copy — a mobile and a desktop header
+filled from one source:
+
+```svelte
+<h1 data-emplace="title"></h1>
+<h1 data-emplace="title"></h1>
+```
+
+```svelte
+<Emplace to="@title" multiple>{data.title}</Emplace>
+```
 
 ## Ordering
 
@@ -124,7 +135,7 @@ avoids. That is fine for a tooltip or an overlay; when the content holds live st
 a video, a focused input) or should be server-rendered, use the component. Two smaller
 consequences:
 
-- A node can only be in one place. If several elements match a name, the first match is used.
+- A node can only be in one place, so there is no `multiple` here.
 - Attachments run in declaration order, so ones written after `{@attach emplace(…)}` already see
   the element at its destination.
 
@@ -167,9 +178,10 @@ hydration, and you get one warning telling you so.
 |---|---|---|
 | `to` | — | `@name`, CSS selector, or element. Omit for the `<body>` container |
 | `priority` | `0` | higher renders first within the same target |
+| `multiple` | `false` | fill every element `to` matches, each with its own copy |
 | `children` | — | content to render at the target |
 
-The `emplace(to?, priority?)` attachment takes the same two values as arguments.
+The `emplace(to?, priority?)` attachment takes those first two values as arguments.
 
 ## Notes
 
@@ -177,7 +189,25 @@ The `emplace(to?, priority?)` attachment takes the same two values as arguments.
   attachment is always client-only: the element renders at its source position in the server
   HTML and moves when the page hydrates.
 - `to` is resolved once, when the content mounts. If the target is not in the DOM yet, the
-  content falls back to the `<body>` container and stays there.
+  content falls back to the `<body>` container and stays there. That case and a target that has
+  been renamed away look the same from the inside, so both log one warning naming the `to` —
+  once per distinct value, not once per mount.
+
+## Upgrading from 1.x
+
+`to` now resolves to one element. In 1.x a `to` matching several elements filled all of them,
+which made a selector that was meant for one destination quietly fan out — a tag or class name
+matching a second, nested copy of a component rendered the content twice.
+
+Add `multiple` wherever you relied on that:
+
+```diff
+-<Emplace to="@title">{data.title}</Emplace>
++<Emplace to="@title" multiple>{data.title}</Emplace>
+```
+
+Only targets you deliberately duplicated need it. An unresolvable `to` still falls back to the
+`<body>` container, but now warns instead of doing it silently.
 
 ## License
 

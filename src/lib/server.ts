@@ -50,7 +50,13 @@ export function transformEmplacements(html: string): string {
 	for (const [name, inputs] of byName) {
 		inputs.sort((a, b) => b.priority - a.priority);
 
-		let inner = '';
+		// Two buckets, because the client mounts each source into as many elements
+		// as its own `multiple` says. Anything the client will not mount into a
+		// second destination must not be server-rendered there either, or the copy
+		// sits in the HTML with nothing coming along to drop it.
+		let first = '';
+		let rest = '';
+		let anyMultiple = false;
 
 		for (const [i, input] of inputs.entries()) {
 			// `context` replays the tree the snippet was authored in, so `getContext`
@@ -61,11 +67,16 @@ export function transformEmplacements(html: string): string {
 				context: input.context,
 				idPrefix: `em${i}-${name}`
 			});
-			inner += piece.body;
+			first += piece.body;
+			if (input.multiple) {
+				rest += piece.body;
+				anyMultiple = true;
+			}
 			head += piece.head;
 		}
 
-		body = splice(body, name, `<!--${SSR_OPEN}-->${inner}<!--${SSR_CLOSE}-->`);
+		const wrap = (inner: string) => `<!--${SSR_OPEN}-->${inner}<!--${SSR_CLOSE}-->`;
+		body = splice(body, name, wrap(first), anyMultiple ? wrap(rest) : null);
 	}
 
 	if (head) {
@@ -103,17 +114,22 @@ export const emplaceHandle = ({ event, resolve }: HandleInput): MaybePromise<Res
 	});
 
 /**
- * Insert `content` inside every element carrying `data-emplace="name"`.
+ * Insert `first` inside the first element carrying `data-emplace="name"`, and
+ * `rest` inside each one after it. A null `rest` leaves them untouched.
  *
  * The destination has to be empty for this to be unambiguous, which is also what
  * hydration requires — see the note in the README.
  */
-function splice(html: string, name: string, content: string): string {
+function splice(html: string, name: string, first: string, rest: string | null): string {
 	const needle = `${NAME_ATTR}="${name}"`;
 	let out = html;
 	let at = 0;
+	let seen = 0;
 
 	for (;;) {
+		const content = seen === 0 ? first : rest;
+		if (content === null) return out;
+
 		const found = out.indexOf(needle, at);
 		if (found === -1) return out;
 
@@ -141,5 +157,6 @@ function splice(html: string, name: string, content: string): string {
 
 		out = out.slice(0, close) + content + out.slice(close);
 		at = close + content.length + tag.length + 3;
+		seen++;
 	}
 }

@@ -4,6 +4,7 @@ import type { Snippet } from 'svelte';
 export interface ServerInput {
 	readonly name: string;
 	readonly priority: number;
+	readonly multiple: boolean;
 	readonly children: Snippet | undefined;
 	readonly context: Map<unknown, unknown>;
 }

@@ -307,8 +307,8 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 				one place. Mounted content can be created once per matching target.{/snippet}
 			{#snippet portal()}One place only. Filling a mobile and a desktop header means writing the
 				content twice.{/snippet}
-			{#snippet emplace()}Every element with the target name gets its own copy, and all of them
-				stay live.{/snippet}
+			{#snippet emplace()}Add <code>multiple</code> and every element with the target name gets
+				its own copy, all of them live.{/snippet}
 			{#snippet demo()}<MultiDemo />{/snippet}
 		</Compare>
 
@@ -345,6 +345,10 @@ import Emplace, &#123; emplace &#125;
   …
 &lt;/Emplace&gt;
 
+&lt;Emplace to="@title" multiple&gt;
+  …
+&lt;/Emplace&gt;
+
 &lt;div &#123;@attach emplace('@tips')&#125;&gt;
   …
 &lt;/div&gt;</pre>
@@ -356,8 +360,7 @@ import Emplace, &#123; emplace &#125;
 			</dd>
 			<dt class="mt-4 text-base font-semibold">Starts with <code>@</code></dt>
 			<dd class="mt-1 text-body">
-				Renders into any element marked <code>data-emplace="name"</code>. If several match,
-				each gets a copy.
+				Renders into the element marked <code>data-emplace="name"</code>.
 			</dd>
 			<dt class="mt-4 text-base font-semibold">Any other string</dt>
 			<dd class="mt-1 text-body">
@@ -367,6 +370,10 @@ import Emplace, &#123; emplace &#125;
 			<dd class="mt-1 text-body">Renders into that element.</dd>
 			<dt class="mt-4 text-base font-semibold"><code>priority</code></dt>
 			<dd class="mt-1 text-body">Higher values render first.</dd>
+			<dt class="mt-4 text-base font-semibold"><code>multiple</code></dt>
+			<dd class="mt-1 text-body">
+				Fills every element <code>to</code> matches, each with its own live copy.
+			</dd>
 			<dt class="mt-4 text-base font-semibold"><code>emplace(to, priority)</code></dt>
 			<dd class="mt-1 text-body">
 				The same targeting as an attachment, for an element you already have. It moves the

@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { Emplace } from 'svelte-emplace';
 
-	let { to = undefined, boomFromStart = false } = $props();
+	let { to = undefined, multiple = false, boomFromStart = false } = $props();
 	let open = $state(true);
 	let boom = $state(boomFromStart);
 
@@ -23,7 +23,7 @@
 <main>
 	<svelte:boundary onerror={(e) => globalThis.__m.caught.push('source:' + e.message)}>
 		{#snippet failed()}<span class="src-failed">fallback</span>{/snippet}
-		{#if open}<Emplace {to}><span
+		{#if open}<Emplace {to} {multiple}><span
 					class="body"
 					transition:fade={{ duration: 100 }}
 					{@attach (node) => {

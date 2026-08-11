@@ -35,24 +35,49 @@ export function emplaceName(to: string): string | null {
 }
 
 /**
- * Where content should go. Several elements can match one name, which is how a
- * single source feeds a mobile and a desktop destination at once. Anything
+ * Where content should go. `multiple` returns every element `to` matches, which
+ * is how one source feeds a mobile and a desktop destination at once. Anything
  * unresolvable falls back to the body layer rather than throwing.
  */
-export function resolveTargets(to?: string | Element | null): Element[] {
+export function resolveTargets(to?: string | Element | null, multiple = false): Element[] {
 	if (isElement(to)) return [to];
 
 	if (typeof to === 'string' && to !== '') {
 		const name = emplaceName(to);
+		let found: NodeListOf<Element> | null = null;
+
 		try {
-			const found = document.querySelectorAll(name === null ? to : `[${NAME_ATTR}="${name}"]`);
-			if (found.length > 0) return Array.from(found);
+			found = document.querySelectorAll(name === null ? to : `[${NAME_ATTR}="${name}"]`);
 		} catch {
 			// An invalid selector is unresolvable, same as one that matches nothing.
+			warnUnresolved(to, 'is not a valid selector');
+		}
+
+		if (found) {
+			if (found.length > 0) return multiple ? Array.from(found) : [found[0]];
+			warnUnresolved(to, 'matched no element');
 		}
 	}
 
 	return [bodyLayer()];
+}
+
+const warnedFor = new Set<string>();
+
+/**
+ * A destination that has gone missing is not fatal — the content still renders,
+ * in the body layer — but it is nearly always a renamed element or a typo, and
+ * the only other symptom is content quietly appearing in the wrong place. Once
+ * per distinct `to`, so a target that only resolves later does not repeat.
+ */
+function warnUnresolved(to: string, reason: string): void {
+	if (warnedFor.has(to)) return;
+	warnedFor.add(to);
+
+	console.warn(
+		`[svelte-emplace] \`to="${to}"\` ${reason}, so the content is in the <body> layer instead. ` +
+			'If the destination mounts later than the content, that is expected: `to` is resolved once.'
+	);
 }
 
 let layer: Element | null = null;
