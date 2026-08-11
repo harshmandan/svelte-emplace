@@ -11,9 +11,9 @@
 <!-- prose that merely documents the attribute must not be spliced into -->
 <p id="prose">use <code>&lt;p data-emplace="a"&gt;</code> as a destination</p>
 
-<Emplace to="a">A</Emplace>
-<Emplace to="b">B</Emplace>
-<Emplace to="c">C</Emplace>
-<Emplace to="d">D</Emplace>
-<Emplace to="e">E</Emplace>
-<Emplace to="f">F</Emplace>
+<Emplace to="@a">A</Emplace>
+<Emplace to="@b">B</Emplace>
+<Emplace to="@c">C</Emplace>
+<Emplace to="@d">D</Emplace>
+<Emplace to="@e">E</Emplace>
+<Emplace to="@f">F</Emplace>

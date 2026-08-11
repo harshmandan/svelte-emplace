@@ -165,7 +165,7 @@
 			<pre class="mt-3 overflow-x-auto bg-wash p-3 text-sm">
 &lt;h1 data-emplace="title"&gt;&lt;/h1&gt;
 
-&lt;Emplace to="title"&gt;
+&lt;Emplace to="@title"&gt;
   &#123;data.title&#125;
 &lt;/Emplace&gt;</pre>
 			<p class="mt-3 text-sm leading-relaxed text-body">
@@ -217,7 +217,7 @@
 &lt;h1 data-emplace="title"&gt;&lt;/h1&gt;
 
 &lt;!-- any page --&gt;
-&lt;Emplace to="title"&gt;
+&lt;Emplace to="@title"&gt;
   &#123;post.title&#125;
 &lt;/Emplace&gt;</pre>
 			<p class="mt-3 text-sm leading-relaxed text-body">
@@ -235,7 +235,7 @@
 // src/hooks.server.js
 export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 		<p class="mt-3 max-w-2xl text-sm leading-relaxed text-body">
-			That is the whole setup. Content aimed at a <em>name</em> now arrives in the first response
+			That is the whole setup. Content aimed at an <em>@name</em> now arrives in the first response
 			instead of appearing after hydration. Selectors, elements and the default layer need a DOM, so
 			they stay client-only — which is what a modal wants anyway.
 		</p>
@@ -251,7 +251,7 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 	</div>
 </Section>
 
-<Emplace to="ssr-note">This text was placed by the server, not the browser</Emplace>
+<Emplace to="@ssr-note">This text was placed by the server, not the browser</Emplace>
 
 <Section id="why" label="Why">
 	<p class="mt-4 max-w-xl text-sm leading-relaxed text-muted">
@@ -332,17 +332,17 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			<pre data-nocopy class="overflow-x-auto bg-wash p-3 text-sm leading-relaxed">
 &lt;Emplace&gt;…&lt;/Emplace&gt;
 
-&lt;Emplace to="title"&gt;…&lt;/Emplace&gt;
+&lt;Emplace to="@title"&gt;…&lt;/Emplace&gt;
 
 &lt;Emplace to="#tooltips"&gt;…&lt;/Emplace&gt;
 
 &lt;Emplace to=&#123;element&#125;&gt;…&lt;/Emplace&gt;
 
-&lt;Emplace to="toolbar" priority=&#123;10&#125;&gt;
+&lt;Emplace to="@toolbar" priority=&#123;10&#125;&gt;
   …
 &lt;/Emplace&gt;
 
-&lt;div &#123;@attach emplace('tips')&#125;&gt;
+&lt;div &#123;@attach emplace('@tips')&#125;&gt;
   …
 &lt;/div&gt;</pre>
 		</div>
@@ -351,15 +351,15 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			<dd class="mt-1 text-body">
 				Renders into a shared container at the end of <code>&lt;body&gt;</code>.
 			</dd>
-			<dt class="mt-4 text-base font-semibold">A name</dt>
+			<dt class="mt-4 text-base font-semibold">Starts with <code>@</code></dt>
 			<dd class="mt-1 text-body">
 				Renders into any element marked <code>data-emplace="name"</code>. If several match,
 				each gets a copy.
 			</dd>
-			<dt class="mt-4 text-base font-semibold">
-				Starts with <code>#</code> <code>.</code> <code>[</code>
-			</dt>
-			<dd class="mt-1 text-body">Treated as a CSS selector.</dd>
+			<dt class="mt-4 text-base font-semibold">Any other string</dt>
+			<dd class="mt-1 text-body">
+				Passed to <code>querySelector</code> — tag, id, class and attribute selectors all work.
+			</dd>
 			<dt class="mt-4 text-base font-semibold">An element</dt>
 			<dd class="mt-1 text-body">Renders into that element.</dd>
 			<dt class="mt-4 text-base font-semibold"><code>priority</code></dt>
@@ -378,8 +378,9 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 		<div class="min-w-0 bg-paper p-4 sm:p-5">
 			<p class="text-base font-semibold">Server rendering is opt-in</p>
 			<p class="mt-2 text-sm leading-relaxed text-body">
-				Without the hook, content mounts in the browser only. With it, names are in the first
-				response but the destination element has to be empty, and the page is no longer streamed.
+				Without the hook, content mounts in the browser only. With it, <code>@name</code> targets
+				are in the first response but the destination element has to be empty, and the page is no
+				longer streamed.
 			</p>
 		</div>
 		<div class="min-w-0 bg-paper p-4 sm:p-5">
@@ -393,7 +394,7 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 			<p class="text-base font-semibold">The attachment moves the element</p>
 			<p class="mt-2 text-sm leading-relaxed text-body">
 				An attachment receives an element that already exists, so
-				<code>&#123;@attach emplace('tips')&#125;</code> re-parents it — the trade-off the
+				<code>&#123;@attach emplace('@tips')&#125;</code> re-parents it — the trade-off the
 				component avoids. Handy for one element; a node can only be in one place, so the first
 				matching target wins.
 			</p>

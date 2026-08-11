@@ -25,8 +25,14 @@ function isElement(value: unknown): value is Element {
 	return typeof value === 'object' && value !== null && (value as Node).nodeType === 1;
 }
 
-/** A `to` string is a CSS selector when it starts like one, otherwise a name. */
-const IS_SELECTOR = /^[#.[]/;
+/**
+ * The name in `to="@name"`, or null when `to` is a CSS selector. CSS reserves
+ * `@` for at-rules, so no selector can ever start with it — which means every
+ * other string can go straight to `querySelector`, tag names included.
+ */
+export function emplaceName(to: string): string | null {
+	return to.startsWith('@') ? to.slice(1) : null;
+}
 
 /**
  * Where content should go. Several elements can match one name, which is how a
@@ -37,9 +43,13 @@ export function resolveTargets(to?: string | Element | null): Element[] {
 	if (isElement(to)) return [to];
 
 	if (typeof to === 'string' && to !== '') {
-		const selector = IS_SELECTOR.test(to) ? to : `[${NAME_ATTR}="${to}"]`;
-		const found = document.querySelectorAll(selector);
-		if (found.length > 0) return Array.from(found);
+		const name = emplaceName(to);
+		try {
+			const found = document.querySelectorAll(name === null ? to : `[${NAME_ATTR}="${name}"]`);
+			if (found.length > 0) return Array.from(found);
+		} catch {
+			// An invalid selector is unresolvable, same as one that matches nothing.
+		}
 	}
 
 	return [bodyLayer()];

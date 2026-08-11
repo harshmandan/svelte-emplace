@@ -29,7 +29,7 @@
 		</div>
 	</div>
 
-	<Emplace to="demo-title">{title}</Emplace>
+	<Emplace to="@demo-title">{title}</Emplace>
 
 	<p class="mt-3 text-sm leading-relaxed text-muted">
 		Two elements share the name <code>demo-title</code>; one <code>&lt;Emplace&gt;</code> fills

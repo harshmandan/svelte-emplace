@@ -4,7 +4,7 @@ import { claim, release, resolveTargets } from './internal.js';
  * Attachment counterpart to `<Emplace>`, for a single element you already have:
  *
  * ```svelte
- * <div class="tip" {@attach emplace('tips')}>…</div>
+ * <div class="tip" {@attach emplace('@tips')}>…</div>
  * ```
  *
  * `to` and `priority` mean the same as on the component, and ordering is shared

@@ -34,9 +34,9 @@ test('E1: with no `to`, content lands in an auto-created body layer', () => {
 	expect(noise).toEqual([]);
 });
 
-test('E2: a name resolves to [data-emplace="name"]', () => {
+test('E2: an @name resolves to [data-emplace="name"]', () => {
 	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
-	mount(Modal, { target: document.body, props: { to: 'tips' } });
+	mount(Modal, { target: document.body, props: { to: '@tips' } });
 	flushSync();
 	expect(document.querySelector('[data-emplace="tips"] .body')).toBeTruthy();
 	expect(document.querySelector('[data-emplace-layer]')).toBe(null);
@@ -68,7 +68,7 @@ test('E5: an unresolvable destination falls back to the body layer', () => {
 test('E6: one source feeds every element matching the name', () => {
 	document.body.innerHTML =
 		'<div id="a" data-emplace="title"></div><div id="b" data-emplace="title"></div>';
-	mount(Modal, { target: document.body, props: { to: 'title' } });
+	mount(Modal, { target: document.body, props: { to: '@title' } });
 	flushSync();
 	expect(document.querySelector('#a .body')).toBeTruthy();
 	expect(document.querySelector('#b .body')).toBeTruthy();
@@ -192,4 +192,21 @@ test('E15: Svelte itself skips outros in nested blocks — parity, not a defect'
 	flushSync();
 
 	expect(globalThis.__animations.filter((a) => a.el?.classList?.contains('n')).length).toBe(0);
+});
+
+test('E16: a bare string is a plain querySelector, so a tag name matches', () => {
+	// The svelte-portal migration case: `to` names a custom element directly.
+	document.body.innerHTML = '<question-bottom-container></question-bottom-container>';
+	mount(Modal, { target: document.body, props: { to: 'question-bottom-container' } });
+	flushSync();
+	expect(document.querySelector('question-bottom-container .body')).toBeTruthy();
+	expect(document.querySelector('[data-emplace-layer]')).toBe(null);
+	expect(noise).toEqual([]);
+});
+
+test('E17: an invalid selector falls back to the body layer instead of throwing', () => {
+	mount(Modal, { target: document.body, props: { to: '((' } });
+	flushSync();
+	expect(document.querySelector('[data-emplace-layer] .body')).toBeTruthy();
+	expect(noise).toEqual([]);
 });

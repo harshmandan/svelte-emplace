@@ -11,18 +11,18 @@
 	```
 
 	`to` picks the destination: omit it for a shared layer at the end of
-	`<body>`, or pass a name for `[data-emplace="name"]`, a CSS selector, or an
+	`<body>`, or pass `@name` for `[data-emplace="name"]`, a CSS selector, or an
 	element. Anything unresolvable falls back to the body layer rather than
 	throwing.
 -->
 <script lang="ts">
 	import { getAllContexts, mount, unmount, type Snippet } from 'svelte';
 	import Boundary from './Boundary.svelte';
-	import { claim, dropServerCopy, release, resolveTargets } from './internal.js';
+	import { claim, dropServerCopy, emplaceName, release, resolveTargets } from './internal.js';
 	import { serverRegister } from './registry.js';
 
 	interface Props {
-		/** A name, a CSS selector, or an element. Omit for the body layer. */
+		/** `@name`, a CSS selector, or an element. Omit for the body layer. */
 		to?: string | Element | null;
 		/** Higher sorts first at the destination. Ties keep registration order. */
 		priority?: number;
@@ -33,15 +33,16 @@
 
 	let caught: unknown = $state(null);
 
-	// On the server there is no DOM to resolve, so only a plain name can be placed —
+	// On the server there is no DOM to resolve, so only an `@name` can be placed —
 	// it is spliced into `[data-emplace="name"]` in the HTML by the hook. Selectors,
 	// elements and the body layer stay client-only. Nothing below this runs on the
 	// server: Svelte strips effect bodies there.
 	if (typeof document === 'undefined') {
 		// svelte-ignore state_referenced_locally
-		if (typeof to === 'string' && to !== '' && !/^[#.[]/.test(to)) {
+		const name = typeof to === 'string' ? emplaceName(to) : null;
+		if (name) {
 			// svelte-ignore state_referenced_locally
-			serverRegister({ name: to, priority, children, context: getAllContexts() });
+			serverRegister({ name, priority, children, context: getAllContexts() });
 		}
 	}
 

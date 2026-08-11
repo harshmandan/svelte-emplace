@@ -39,25 +39,27 @@ place for modals and toasts.
 
 ## Targets
 
-Mark an element with `data-emplace` and refer to it by name:
+Mark an element with `data-emplace` and refer to it by name, prefixed with `@`:
 
 ```svelte
 <h1 data-emplace="title"></h1>
 ```
 
 ```svelte
-<Emplace to="title">{data.title}</Emplace>
+<Emplace to="@title">{data.title}</Emplace>
 ```
 
-`to` also accepts a CSS selector or an element reference:
+Any other string is passed to `querySelector`, so every selector works — tag names included —
+and an element reference is used as-is:
 
 ```svelte
 <Emplace to="#tooltips">…</Emplace>
+<Emplace to="dialog-container">…</Emplace>
 <Emplace to={element}>…</Emplace>
 ```
 
-A string starting with `#`, `.` or `[` is treated as a selector; any other string is a name,
-matching `[data-emplace="name"]`. If no target matches, content falls back to the `<body>`
+The `@` prefix is unambiguous because CSS reserves `@` for at-rules — no selector can start
+with it. If no target matches (or the selector is invalid), content falls back to the `<body>`
 container.
 
 If several elements share a name, the content renders into **all** of them — for example, a
@@ -70,8 +72,8 @@ renders first, ties keep registration order, and the order holds no matter when 
 mounts.
 
 ```svelte
-<Emplace to="toolbar" priority={10}><button>Save</button></Emplace>
-<Emplace to="toolbar"><button>Cancel</button></Emplace>
+<Emplace to="@toolbar" priority={10}><button>Save</button></Emplace>
+<Emplace to="@toolbar"><button>Cancel</button></Emplace>
 ```
 
 ## Error boundaries
@@ -106,11 +108,11 @@ wrapper component:
   import { emplace } from 'svelte-emplace';
 </script>
 
-<div class="tip" {@attach emplace('tips')}>…</div>
+<div class="tip" {@attach emplace('@tips')}>…</div>
 ```
 
-The arguments mirror the component: a name, a CSS selector, or an element — omit it for the
-`<body>` container — and an optional priority, `emplace('toolbar', 10)`, which sorts against
+The arguments mirror the component: `@name`, a CSS selector, or an element — omit it for the
+`<body>` container — and an optional priority, `emplace('@toolbar', 10)`, which sorts against
 `<Emplace>` content in the same target.
 
 One difference is structural: an attachment receives an element that already exists, so the
@@ -135,11 +137,11 @@ destination in the server HTML:
 export { emplaceHandle as handle } from 'svelte-emplace/server';
 ```
 
-Nothing in your components changes. `<Emplace to="title">` now appears inside
+Nothing in your components changes. `<Emplace to="@title">` now appears inside
 `<h1 data-emplace="title">` in the first response, with `getContext` and
 `<svelte:head>` working from inside emplaced content.
 
-Only names are server-rendered. CSS selectors, element targets and the body layer
+Only `@name` targets are server-rendered. CSS selectors, element targets and the body layer
 need a DOM, so they stay client-only and appear after hydration — which is also
 what a modal or tooltip wants.
 
@@ -160,7 +162,7 @@ hydration, and you get one warning telling you so.
 
 | prop | default | |
 |---|---|---|
-| `to` | — | target name, CSS selector, or element. Omit for the `<body>` container |
+| `to` | — | `@name`, CSS selector, or element. Omit for the `<body>` container |
 | `priority` | `0` | higher renders first within the same target |
 | `children` | — | content to render at the target |
 

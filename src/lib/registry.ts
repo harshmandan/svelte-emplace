@@ -34,7 +34,7 @@ export function serverRegister(input: ServerInput): void {
 		if (!warned) {
 			warned = true;
 			console.warn(
-				'[svelte-emplace] `to="' +
+				'[svelte-emplace] `to="@' +
 					input.name +
 					'"` was not server-rendered because no request store was found. Add the hook:\n\n' +
 					"  // src/hooks.server.js\n  export { emplaceHandle as handle } from 'svelte-emplace/server';\n\n" +

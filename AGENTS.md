@@ -61,8 +61,10 @@ into an `AsyncLocalStorage` store on the server, and the hook renders each snipp
 4. **`dropServerCopy` runs in the same flush as the mount**, immediately after
    `mount()` in the effect. Move it later and you get a frame with both copies.
 
-Only plain names are handled server-side; selectors, elements and the body layer
-need a DOM and stay client-only.
+Only `@name` targets are handled server-side; selectors, elements and the body
+layer need a DOM and stay client-only. (`@` marks a name because CSS reserves it
+for at-rules — no selector can start with it — so every other string goes
+straight to `querySelector`.)
 
 ## Test environment
 

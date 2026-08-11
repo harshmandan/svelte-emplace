@@ -24,7 +24,7 @@ afterEach(() => {
 
 test('A1: the attachment moves the element into a named destination, no wrapper', () => {
 	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
-	mount(Attach, { target: document.body, props: { to: 'tips' } });
+	mount(Attach, { target: document.body, props: { to: '@tips' } });
 	flushSync();
 	expect(document.querySelector('[data-emplace="tips"] > .att')).toBeTruthy();
 	expect(document.querySelector('main .att')).toBe(null);
@@ -40,7 +40,7 @@ test('A2: with no argument, the element lands in the body layer', () => {
 
 test('A3: attachments declared after emplace already see the destination', () => {
 	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
-	mount(Attach, { target: document.body, props: { to: 'tips' } });
+	mount(Attach, { target: document.body, props: { to: '@tips' } });
 	flushSync();
 	expect(globalThis.__a.parents).toEqual(['tips']);
 });
@@ -54,11 +54,11 @@ test('A4: attachment and component content sort together by priority', () => {
 
 test('A5: changing the destination moves the element and leaves nothing behind', () => {
 	document.body.innerHTML = '<div data-emplace="one"></div><div data-emplace="two"></div>';
-	mount(Attach, { target: document.body, props: { to: 'one' } });
+	mount(Attach, { target: document.body, props: { to: '@one' } });
 	flushSync();
 	expect(document.querySelector('[data-emplace="one"] > .att')).toBeTruthy();
 
-	globalThis.__a.retarget('two');
+	globalThis.__a.retarget('@two');
 	flushSync();
 	expect(document.querySelector('[data-emplace="two"] > .att')).toBeTruthy();
 	expect(document.querySelector('[data-emplace="one"]').childNodes.length).toBe(0);
@@ -67,7 +67,7 @@ test('A5: changing the destination moves the element and leaves nothing behind',
 
 test('A6: the outro plays at the destination, then the target is left empty', async () => {
 	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
-	mount(Attach, { target: document.body, props: { to: 'tips' } });
+	mount(Attach, { target: document.body, props: { to: '@tips' } });
 	flushSync();
 	await wait(150);
 
@@ -83,7 +83,7 @@ test('A6: the outro plays at the destination, then the target is left empty', as
 
 test('A7: closing then reopening leaves exactly one copy', async () => {
 	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
-	mount(Attach, { target: document.body, props: { to: 'tips' } });
+	mount(Attach, { target: document.body, props: { to: '@tips' } });
 	flushSync();
 	globalThis.__a.close();
 	flushSync();
