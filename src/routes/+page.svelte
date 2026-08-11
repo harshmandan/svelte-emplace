@@ -146,7 +146,7 @@
 			<p class="text-base font-semibold">2 · Use it</p>
 			<pre class="mt-3 overflow-x-auto bg-wash p-3 text-sm">
 &lt;script&gt;
-  import &#123; Emplace &#125;
+  import Emplace
     from 'svelte-emplace';
 &lt;/script&gt;
 
@@ -330,6 +330,9 @@ export &#123; emplaceHandle as handle &#125; from 'svelte-emplace/server'</pre>
 	<div class="mt-6 grid grid-cols-1 gap-px border border-rule bg-rule md:grid-cols-2">
 		<div class="min-w-0 bg-paper p-4 sm:p-6">
 			<pre data-nocopy class="overflow-x-auto bg-wash p-3 text-sm leading-relaxed">
+import Emplace, &#123; emplace &#125;
+  from 'svelte-emplace';
+
 &lt;Emplace&gt;…&lt;/Emplace&gt;
 
 &lt;Emplace to="@title"&gt;…&lt;/Emplace&gt;

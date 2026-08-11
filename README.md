@@ -26,7 +26,7 @@ npm i svelte-emplace
 
 ```svelte
 <script>
-  import { Emplace } from 'svelte-emplace';
+  import Emplace from 'svelte-emplace';
 </script>
 
 <Emplace>
@@ -37,8 +37,8 @@ npm i svelte-emplace
 Without a `to` prop, content renders into a shared container at the end of `<body>` — the usual
 place for modals and toasts.
 
-`<Emplace>` is also the default export, so the svelte-portal import shape works unchanged:
-`import Emplace from 'svelte-emplace'`.
+The component is the default export — the same import shape as svelte-portal — and a named one:
+`import { Emplace, emplace } from 'svelte-emplace'` also works.
 
 ## Targets
 
