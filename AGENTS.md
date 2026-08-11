@@ -16,7 +16,8 @@ existing element, as a shorthand for single-element cases.
 An attachment only ever receives an element that already exists, so
 create-at-destination is impossible there — do not try to "fix" it, and do not
 let its existence justify moving DOM anywhere else. It shares `claim`/`release`,
-so its ordering interoperates with the component's `priority`.
+so its ordering interoperates with the component's `priority`, and it must return
+the node to where it came from on cleanup — see Probes.
 
 ## Four things found by probing, not reasoning
 
@@ -121,3 +122,8 @@ under late mounts, and error bridging on both update and first render.
 destination and the body layer, wrapper-free placement, attachment-order
 visibility of the destination, priority interop with `<Emplace>` in one target,
 retargeting when `to` changes, outro-at-destination, and reopen cleanliness.
+`A8`–`A10` pin teardown: Svelte removes an unmounting block by walking the sibling
+range it recorded at mount, and a moved node is no longer in that range. The
+attachment leaves a comment at the node's original position and puts the node back
+there on cleanup, which runs after the outro and before the walk. Without it the
+moved element survives at its destination — the dialog that will not close.

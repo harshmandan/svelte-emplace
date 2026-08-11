@@ -2,6 +2,7 @@ import { test, expect, beforeEach, afterEach } from 'bun:test';
 import { mount, flushSync } from 'svelte';
 import Attach from './fixtures/Attach.svelte';
 import AttachMix from './fixtures/AttachMix.svelte';
+import AttachTeardown from './fixtures/AttachTeardown.svelte';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const texts = (sel) => [...document.querySelectorAll(sel)].map((n) => n.textContent);
@@ -92,4 +93,41 @@ test('A7: closing then reopening leaves exactly one copy', async () => {
 	flushSync();
 	await wait(150);
 	expect(texts('[data-emplace="tips"] .att')).toEqual(['attached']);
+});
+
+// A8–A10 pin the teardown path. Svelte removes an unmounting block by walking the
+// sibling range it recorded at mount; a moved node has left that range, so without
+// the placeholder the attachment leaves behind it survives at its destination.
+const teardown = (shape) => {
+	document.body.innerHTML = '<aside data-emplace="tips"></aside>';
+	mount(AttachTeardown, { target: document.body, props: { to: '@tips', shape } });
+	flushSync();
+	expect(document.querySelector('[data-emplace="tips"] > .moved')).toBeTruthy();
+
+	globalThis.__t.close();
+	flushSync();
+};
+
+test('A8: closing the block removes the moved element and its siblings', () => {
+	teardown('inline');
+	expect(document.querySelector('.moved')).toBe(null);
+	expect(document.querySelector('.stay')).toBe(null);
+	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
+	expect(noise).toEqual([]);
+});
+
+test('A9: unmounting the owning component removes the moved element too', () => {
+	teardown('component');
+	expect(document.querySelector('.moved')).toBe(null);
+	expect(document.querySelector('.stay')).toBe(null);
+	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
+	expect(noise).toEqual([]);
+});
+
+test('A10: two moved siblings are both removed', () => {
+	teardown('pair');
+	expect(texts('.moved')).toEqual([]);
+	expect(document.querySelector('.stay')).toBe(null);
+	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
+	expect(noise).toEqual([]);
 });
