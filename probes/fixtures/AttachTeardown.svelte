@@ -1,4 +1,5 @@
 <script>
+	import { fade } from 'svelte/transition';
 	import { emplace } from 'svelte-emplace';
 	import AttachLeaf from './AttachLeaf.svelte';
 
@@ -9,7 +10,15 @@
 </script>
 
 <main>
-	{#if open}
+	{#if shape === 'out'}
+		{#if open}
+			<span class="moved" out:fade={{ duration: 100 }} {@attach emplace(to)}>moved</span>
+		{/if}
+	{:else if shape === 'alone'}
+		{#if open}
+			<span class="moved" {@attach emplace(to)}>moved</span>
+		{/if}
+	{:else if open}
 		{#if shape === 'component'}
 			<AttachLeaf {to} />
 		{:else if shape === 'pair'}

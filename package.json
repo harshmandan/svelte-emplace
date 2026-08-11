@@ -1,6 +1,6 @@
 {
 	"name": "svelte-emplace",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Portals for Svelte 5 that never relocate your DOM. Content is created at its destination, so measurements, focus and close animations are right the first time.",
 	"license": "MIT",
 	"homepage": "https://svelte-emplace.harsh.ink",

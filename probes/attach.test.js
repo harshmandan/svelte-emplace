@@ -93,6 +93,7 @@ test('A7: closing then reopening leaves exactly one copy', async () => {
 	flushSync();
 	await wait(150);
 	expect(texts('[data-emplace="tips"] .att')).toEqual(['attached']);
+	expect(texts('.att')).toEqual(['attached']);
 });
 
 // A8–A10 pin the teardown path. Svelte removes an unmounting block by walking the
@@ -128,6 +129,28 @@ test('A10: two moved siblings are both removed', () => {
 	teardown('pair');
 	expect(texts('.moved')).toEqual([]);
 	expect(document.querySelector('.stay')).toBe(null);
+	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
+	expect(noise).toEqual([]);
+});
+
+// A11–A12 pin the other half. Svelte can also remove the node itself — after an
+// outro, or because the node is where the recorded range starts — before the
+// attachment cleanup runs. Moving it home then would put a dead element back at
+// the original position.
+test('A11: a moved element with an out transition stays gone once the outro ends', async () => {
+	teardown('out');
+	await wait(300);
+	flushSync();
+	expect(document.querySelector('.moved')).toBe(null);
+	expect(document.querySelector('main').children.length).toBe(0);
+	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
+	expect(noise).toEqual([]);
+});
+
+test('A12: the same without a transition leaves nothing at the original position', () => {
+	teardown('alone');
+	expect(document.querySelector('.moved')).toBe(null);
+	expect(document.querySelector('main').children.length).toBe(0);
 	expect(document.querySelector('[data-emplace="tips"]').childNodes.length).toBe(0);
 	expect(noise).toEqual([]);
 });

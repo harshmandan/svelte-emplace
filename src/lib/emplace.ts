@@ -36,6 +36,15 @@ export function emplace(to?: string | Element | null, priority = 0) {
 		// the node from `home` to the new destination.
 		return () => {
 			release(target, slot);
+
+			// Ordering between the removal and this cleanup is not guaranteed: a
+			// per-node removal after an outro, or the range walk itself, can reach
+			// the node first. Moving an already-removed node home would re-insert a
+			// dead element into the document, so only return one that is still live.
+			if (!node.isConnected) {
+				home.remove();
+				return;
+			}
 			if (home.isConnected) home.replaceWith(node);
 			else node.remove();
 		};
