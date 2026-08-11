@@ -193,22 +193,6 @@ The `emplace(to?, priority?)` attachment takes those first two values as argumen
   been renamed away look the same from the inside, so both log one warning naming the `to` —
   once per distinct value, not once per mount.
 
-## Upgrading from 1.x
-
-`to` now resolves to one element. In 1.x a `to` matching several elements filled all of them,
-which made a selector that was meant for one destination quietly fan out — a tag or class name
-matching a second, nested copy of a component rendered the content twice.
-
-Add `multiple` wherever you relied on that:
-
-```diff
--<Emplace to="@title">{data.title}</Emplace>
-+<Emplace to="@title" multiple>{data.title}</Emplace>
-```
-
-Only targets you deliberately duplicated need it. An unresolvable `to` still falls back to the
-`<body>` container, but now warns instead of doing it silently.
-
 ## License
 
 MIT
