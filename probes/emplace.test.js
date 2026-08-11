@@ -1,5 +1,6 @@
 import { test, expect, beforeEach, afterEach } from 'bun:test';
 import { mount, flushSync } from 'svelte';
+import EmplaceDefault, { Emplace } from 'svelte-emplace';
 import Modal from './fixtures/Modal.svelte';
 import Stack from './fixtures/Stack.svelte';
 import Swap from './fixtures/Swap.svelte';
@@ -209,4 +210,9 @@ test('E17: an invalid selector falls back to the body layer instead of throwing'
 	flushSync();
 	expect(document.querySelector('[data-emplace-layer] .body')).toBeTruthy();
 	expect(noise).toEqual([]);
+});
+
+test('E18: the component is the default export as well as a named one', () => {
+	// The svelte-portal import shape: `import Emplace from 'svelte-emplace'`.
+	expect(EmplaceDefault).toBe(Emplace);
 });

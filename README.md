@@ -37,6 +37,9 @@ npm i svelte-emplace
 Without a `to` prop, content renders into a shared container at the end of `<body>` — the usual
 place for modals and toasts.
 
+`<Emplace>` is also the default export, so the svelte-portal import shape works unchanged:
+`import Emplace from 'svelte-emplace'`.
+
 ## Targets
 
 Mark an element with `data-emplace` and refer to it by name, prefixed with `@`:
